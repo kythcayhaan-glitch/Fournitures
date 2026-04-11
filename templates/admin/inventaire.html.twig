@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inventaire{% endblock %}
+{% block page_title %}<i class="bi bi-clipboard-data"></i> Inventaire{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Inventaire</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Gestion des stocks</h4>
+    <a href="{{ path('app_admin_historique') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-clock-history"></i> Historique des mouvements
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-8">
+                <input type="text" name="search" class="form-control form-control-sm"
+                       placeholder="Rechercher par nom ou référence..." value="{{ search ?? '' }}">
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{{ path('app_admin_inventaire') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Article</th>
+                        <th>Catégorie</th>
+                        <th class="text-center">Stock actuel</th>
+                        <th class="text-center">Stock min.</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fourniture in pagination %}
+                        {{ include('components/ligne_stock.html.twig', {fourniture: fourniture, show_actions: true}) }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center py-3">
+            {{ knp_pagination_render(pagination) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

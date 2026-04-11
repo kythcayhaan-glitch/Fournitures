@@ -1,0 +1,30 @@
+{% set is_low = fourniture.stockQuantity <= fourniture.stockMinimum %}
+<tr class="{{ is_low ? 'stock-bas' : '' }}">
+    <td>
+        <strong>{{ fourniture.name }}</strong>
+        <br><small class="text-muted">{{ fourniture.reference }}</small>
+    </td>
+    <td>{{ fourniture.category.name }}</td>
+    <td class="text-center">
+        <span class="badge {{ is_low ? 'bg-danger' : 'bg-success' }} fs-6">
+            {{ fourniture.stockQuantity }}
+        </span>
+        <small class="text-muted">/ {{ fourniture.unit }}</small>
+    </td>
+    <td class="text-center text-muted">{{ fourniture.stockMinimum }}</td>
+    <td class="text-center">
+        {% if is_low %}
+            <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Stock bas</span>
+        {% else %}
+            <span class="badge bg-success"><i class="bi bi-check"></i> OK</span>
+        {% endif %}
+    </td>
+    {% if show_actions ?? false %}
+    <td>
+        <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
+           class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil"></i> Ajuster
+        </a>
+    </td>
+    {% endif %}
+</tr>

@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Traiter la demande {{ demande.reference }}{% endblock %}
+{% block page_title %}<i class="bi bi-check2-square"></i> Traiter une demande{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_manager_index') }}">Gestion demandes</a></li>
+        <li class="breadcrumb-item active">Traiter {{ demande.reference }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row g-3">
+    <div class="col-lg-7">
+        {# Résumé de la demande #}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">{{ demande.reference }}
+                    {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Demandeur</small>
+                        <div class="fw-semibold">{{ demande.requester.fullName }}</div>
+                        <div class="text-muted small">{{ demande.requester.email }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Date de demande</small>
+                        <div class="fw-semibold">{{ demande.requestedAt|date('d/m/Y à H:i') }}</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Motif</small>
+                    <p class="mb-0 p-2 bg-light rounded">{{ demande.motif }}</p>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Article</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-center">Stock dispo</th>
+                                <th class="text-end">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ligne in demande.lignes %}
+                            <tr>
+                                <td>
+                                    {{ ligne.fourniture.name }}
+                                    <small class="text-muted">({{ ligne.fourniture.reference }})</small>
+                                </td>
+                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.fourniture.unit }}</td>
+                                <td class="text-center">
+                                    {% if ligne.fourniture.stockQuantity >= ligne.quantiteDemandee %}
+                                        <span class="badge bg-success">{{ ligne.fourniture.stockQuantity }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger" title="Stock insuffisant">
+                                            {{ ligne.fourniture.stockQuantity }}
+                                        </span>
+                                        <i class="bi bi-exclamation-triangle text-danger" title="Stock insuffisant"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ ligne.sousTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light fw-bold">
+                                <td colspan="3" class="text-end">Total</td>
+                                <td class="text-end">{{ demande.montantTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-check2-circle"></i> Décision</h6>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Votre décision</label>
+                    <div class="d-flex gap-3">
+                        {% for child in form.action %}
+                        <div class="form-check">
+                            {{ form_widget(child, {attr: {class: 'form-check-input'}}) }}
+                            {{ form_label(child, null, {label_attr: {class: 'form-check-label'}}) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.commentaire) }}
+                    {{ form_widget(form.commentaire) }}
+                    <div class="form-text text-muted">Obligatoire en cas de rejet</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Confirmer
+                    </button>
+                    <a href="{{ path('app_manager_index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

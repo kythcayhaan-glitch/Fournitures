@@ -1,0 +1,20 @@
+{% set classes = {
+    'pending':   'bg-warning text-dark',
+    'approved':  'bg-info text-dark',
+    'rejected':  'bg-danger',
+    'delivered': 'bg-success'
+} %}
+{% set labels = {
+    'pending':   'En attente',
+    'approved':  'Approuvée',
+    'rejected':  'Rejetée',
+    'delivered': 'Livrée'
+} %}
+<span class="badge {{ classes[statut] ?? 'bg-secondary' }} badge-statut">
+    {% if statut == 'pending' %}<i class="bi bi-hourglass-split"></i>
+    {% elseif statut == 'approved' %}<i class="bi bi-check-circle"></i>
+    {% elseif statut == 'rejected' %}<i class="bi bi-x-circle"></i>
+    {% elseif statut == 'delivered' %}<i class="bi bi-truck"></i>
+    {% endif %}
+    {{ labels[statut] ?? statut }}
+</span>

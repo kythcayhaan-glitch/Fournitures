@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livraison {{ demande.reference }}{% endblock %}
+{% block page_title %}<i class="bi bi-truck"></i> Confirmer la livraison{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_manager_index') }}">Gestion demandes</a></li>
+        <li class="breadcrumb-item active">Livraison {{ demande.reference }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Saisissez les quantités réellement servies pour chaque article.
+            Le stock sera mis à jour automatiquement.
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Livraison de la demande {{ demande.reference }}</h5>
+                <small class="text-muted">Demandeur : {{ demande.requester.fullName }}</small>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Article</th>
+                                <th class="text-center">Stock actuel</th>
+                                <th class="text-center">Qté demandée</th>
+                                <th class="text-center" style="width: 150px">Qté servie</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i, ligne in form.lignes %}
+                            {% set ligneEntity = demande.lignes[i] %}
+                            <tr>
+                                <td>
+                                    <strong>{{ ligneEntity.fourniture.name }}</strong>
+                                    <br><small class="text-muted">{{ ligneEntity.fourniture.reference }}</small>
+                                </td>
+                                <td class="text-center">
+                                    {% if ligneEntity.fourniture.stockQuantity >= ligneEntity.quantiteDemandee %}
+                                        <span class="badge bg-success fs-6">{{ ligneEntity.fourniture.stockQuantity }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger fs-6">{{ ligneEntity.fourniture.stockQuantity }}</span>
+                                    {% endif %}
+                                    <small class="text-muted">{{ ligneEntity.fourniture.unit }}</small>
+                                </td>
+                                <td class="text-center fw-semibold">
+                                    {{ ligneEntity.quantiteDemandee }} {{ ligneEntity.fourniture.unit }}
+                                </td>
+                                <td>
+                                    {{ form_widget(ligne.quantiteServie, {
+                                        value: ligneEntity.quantiteDemandee,
+                                        attr: {
+                                            class: 'form-control form-control-sm text-center',
+                                            min: 0,
+                                            max: ligneEntity.quantiteDemandee
+                                        }
+                                    }) }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-truck"></i> Confirmer la livraison
+                    </button>
+                    <a href="{{ path('app_manager_index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

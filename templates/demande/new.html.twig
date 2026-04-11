@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle demande{% endblock %}
+{% block page_title %}<i class="bi bi-plus-circle"></i> Nouvelle demande{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_demande_index') }}">Mes demandes</a></li>
+        <li class="breadcrumb-item active">Nouvelle demande</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-plus"></i> Nouvelle demande de matériel</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+
+                <div class="mb-4">
+                    {{ form_label(form.motif) }}
+                    {{ form_widget(form.motif) }}
+                    {{ form_errors(form.motif) }}
+                </div>
+
+                <hr>
+                <h6 class="fw-bold mb-3"><i class="bi bi-list-ul"></i> Articles demandés</h6>
+
+                <div id="lignes-container" data-prototype="{{ form_widget(form.lignes.vars.prototype)|e('html_attr') }}">
+                    {% for ligne in form.lignes %}
+                    <div class="ligne-demande card card-body mb-2 bg-light border">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-8">
+                                {{ form_label(ligne.fourniture) }}
+                                {{ form_widget(ligne.fourniture) }}
+                                {{ form_errors(ligne.fourniture) }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_label(ligne.quantiteDemandee) }}
+                                {{ form_widget(ligne.quantiteDemandee) }}
+                                {{ form_errors(ligne.quantiteDemandee) }}
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-ligne" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div id="no-lignes-msg" class="alert alert-warning {% if form.lignes|length > 0 %}d-none{% endif %}">
+                    <i class="bi bi-exclamation-circle"></i> Veuillez ajouter au moins un article.
+                </div>
+
+                <button type="button" id="add-ligne" class="btn btn-outline-primary btn-sm mb-4">
+                    <i class="bi bi-plus-lg"></i> Ajouter un article
+                </button>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Soumettre la demande
+                    </button>
+                    <a href="{{ path('app_demande_index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x"></i> Annuler
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('lignes-container');
+    const addBtn = document.getElementById('add-ligne');
+    const noLignesMsg = document.getElementById('no-lignes-msg');
+    let index = container.querySelectorAll('.ligne-demande').length;
+
+    function updateNoLignesMsg() {
+        const count = container.querySelectorAll('.ligne-demande').length;
+        noLignesMsg.classList.toggle('d-none', count > 0);
+    }
+
+    function addRemoveHandler(el) {
+        el.querySelector('.remove-ligne').addEventListener('click', function () {
+            el.remove();
+            updateNoLignesMsg();
+        });
+    }
+
+    // Attach handlers to existing lines
+    container.querySelectorAll('.ligne-demande').forEach(addRemoveHandler);
+
+    addBtn.addEventListener('click', function () {
+        const prototype = container.dataset.prototype;
+        const newHtml = prototype.replace(/__name__/g, index);
+        const div = document.createElement('div');
+        div.className = 'ligne-demande card card-body mb-2 bg-light border';
+        div.innerHTML = `<div class="row g-2 align-items-end">
+            <div class="col-md-8">${newHtml.match(/<div[^>]*>[\s\S]*?<\/div>/)[0]}</div>
+        </div>`;
+
+        // Better approach: parse properly
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `<div class="ligne-demande card card-body mb-2 bg-light border">${newHtml}
+            <div class="text-end mt-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-ligne">
+                    <i class="bi bi-trash"></i> Supprimer
+                </button>
+            </div>
+        </div>`;
+        const newLine = wrapper.firstElementChild;
+        container.appendChild(newLine);
+        addRemoveHandler(newLine);
+        index++;
+        updateNoLignesMsg();
+    });
+
+    updateNoLignesMsg();
+});
+</script>
+{% endblock %}

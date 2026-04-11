@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des mouvements{% endblock %}
+{% block page_title %}<i class="bi bi-clock-history"></i> Historique des mouvements{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_admin_inventaire') }}">Inventaire</a></li>
+        <li class="breadcrumb-item active">Historique</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Type</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">Tous</option>
+                    <option value="entree" {{ type == 'entree' ? 'selected' : '' }}>Entrée</option>
+                    <option value="sortie" {{ type == 'sortie' ? 'selected' : '' }}>Sortie</option>
+                    <option value="ajustement" {{ type == 'ajustement' ? 'selected' : '' }}>Ajustement</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Du</label>
+                <input type="date" name="from" class="form-control form-control-sm"
+                       value="{{ from ? from|date('Y-m-d') : '' }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Au</label>
+                <input type="date" name="to" class="form-control form-control-sm"
+                       value="{{ to ? to|date('Y-m-d') : '' }}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-filter"></i> Filtrer
+                </button>
+                <a href="{{ path('app_admin_historique') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Article</th>
+                        <th>Type</th>
+                        <th class="text-center">Avant</th>
+                        <th class="text-center">Qté</th>
+                        <th class="text-center">Après</th>
+                        <th>Motif</th>
+                        <th>Opérateur</th>
+                        <th>Demande</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mouvement in pagination %}
+                    <tr>
+                        <td class="text-muted small text-nowrap">{{ mouvement.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <strong>{{ mouvement.fourniture.name }}</strong>
+                            <br><small class="text-muted">{{ mouvement.fourniture.reference }}</small>
+                        </td>
+                        <td>
+                            <span class="badge {{ mouvement.type.badgeClass() }}">
+                                {{ mouvement.type.label() }}
+                            </span>
+                        </td>
+                        <td class="text-center text-muted">{{ mouvement.quantiteAvant }}</td>
+                        <td class="text-center fw-bold">
+                            {% if mouvement.type.value == 'entree' %}
+                                <span class="text-success">+{{ mouvement.quantite }}</span>
+                            {% elseif mouvement.type.value == 'sortie' %}
+                                <span class="text-danger">-{{ mouvement.quantite }}</span>
+                            {% else %}
+                                <span class="text-secondary">~{{ mouvement.quantite }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge {{ mouvement.quantiteApres <= mouvement.fourniture.stockMinimum ? 'bg-danger' : 'bg-success' }}">
+                                {{ mouvement.quantiteApres }}
+                            </span>
+                        </td>
+                        <td class="small text-muted" style="max-width: 200px;">
+                            {{ mouvement.motif|u.truncate(60, '…') }}
+                        </td>
+                        <td class="small">{{ mouvement.operateur.fullName }}</td>
+                        <td class="small">
+                            {% if mouvement.demande %}
+                                <a href="{{ path('app_demande_show', {id: mouvement.demande.id}) }}" class="text-decoration-none">
+                                    {{ mouvement.demande.reference }}
+                                </a>
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center py-3">
+            {{ knp_pagination_render(pagination) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

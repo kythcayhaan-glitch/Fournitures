@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajuster le stock{% endblock %}
+{% block page_title %}<i class="bi bi-clipboard-data"></i> Ajustement de stock{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_admin_inventaire') }}">Inventaire</a></li>
+        <li class="breadcrumb-item active">Ajuster {{ fourniture.reference }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Ajustement de stock</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex gap-3 align-items-center">
+                        <div>
+                            <strong>{{ fourniture.name }}</strong>
+                            <span class="text-muted">({{ fourniture.reference }})</span>
+                        </div>
+                        <div class="ms-auto">
+                            <div class="text-muted small">Stock actuel</div>
+                            <span class="badge bg-{{ fourniture.isStockBas ? 'danger' : 'success' }} fs-5">
+                                {{ fourniture.stockQuantity }} {{ fourniture.unit }}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Seuil min.</div>
+                            <strong>{{ fourniture.stockMinimum }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_start(form) }}
+                {{ form_row(form.nouvelleQuantite) }}
+                {{ form_row(form.motif) }}
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Appliquer l'ajustement
+                    </button>
+                    <a href="{{ path('app_admin_inventaire') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

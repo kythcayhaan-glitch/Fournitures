@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Demande {{ demande.reference }}{% endblock %}
+{% block page_title %}<i class="bi bi-clipboard-check"></i> Demande {{ demande.reference }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_demande_index') }}">Mes demandes</a></li>
+        <li class="breadcrumb-item active">{{ demande.reference }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ demande.reference }}</h5>
+                {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Demandeur</small>
+                        <strong>{{ demande.requester.fullName }}</strong>
+                        <span class="text-muted">({{ demande.requester.email }})</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Date de demande</small>
+                        <strong>{{ demande.requestedAt|date('d/m/Y à H:i') }}</strong>
+                    </div>
+                </div>
+
+                {% if demande.processedAt %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Traité par</small>
+                        <strong>{{ demande.processedBy ? demande.processedBy.fullName : 'N/A' }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Date de traitement</small>
+                        <strong>{{ demande.processedAt|date('d/m/Y à H:i') }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Motif</small>
+                    <p class="mb-0">{{ demande.motif }}</p>
+                </div>
+
+                {% if demande.commentaire %}
+                <div class="alert alert-{{ demande.statut == 'rejected' ? 'danger' : 'info' }} mb-3">
+                    <i class="bi bi-chat-text"></i>
+                    <strong>Commentaire :</strong> {{ demande.commentaire }}
+                </div>
+                {% endif %}
+
+                <h6 class="fw-bold mt-4 mb-3"><i class="bi bi-list-ul"></i> Articles demandés</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Article</th>
+                                <th>Réf.</th>
+                                <th class="text-center">Qté demandée</th>
+                                {% if demande.isDelivered %}
+                                <th class="text-center">Qté servie</th>
+                                {% endif %}
+                                <th class="text-end">Prix unit.</th>
+                                <th class="text-end">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ligne in demande.lignes %}
+                            <tr>
+                                <td>{{ ligne.fourniture.name }}</td>
+                                <td class="text-muted small">{{ ligne.fourniture.reference }}</td>
+                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.fourniture.unit }}</td>
+                                {% if demande.isDelivered %}
+                                <td class="text-center">
+                                    <span class="{{ ligne.quantiteServie < ligne.quantiteDemandee ? 'text-warning' : 'text-success' }}">
+                                        {{ ligne.quantiteServie }} {{ ligne.fourniture.unit }}
+                                    </span>
+                                </td>
+                                {% endif %}
+                                <td class="text-end">{{ ligne.fourniture.unitPrice|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-end fw-semibold">{{ ligne.sousTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td colspan="{{ demande.isDelivered ? 5 : 4 }}" class="text-end fw-bold">Total estimé</td>
+                                <td class="text-end fw-bold">{{ demande.montantTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            {% if demande.isPending and is_granted('DEMANDE_CANCEL', demande) %}
+            <div class="card-footer">
+                <form method="post" action="{{ path('app_demande_cancel', {id: demande.id}) }}"
+                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cancel_demande_' ~ demande.id) }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-x-circle"></i> Annuler ma demande
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0">Récapitulatif</h6></div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <small class="text-muted">Référence</small>
+                        <br><strong>{{ demande.reference }}</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Statut</small>
+                        <br>{{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Nombre d'articles</small>
+                        <br><strong>{{ demande.lignes|length }}</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Montant estimé</small>
+                        <br><strong>{{ demande.montantTotal|number_format(2, ',', ' ') }} €</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_MANAGER') %}
+        <div class="card mt-3">
+            <div class="card-header"><h6 class="mb-0">Actions manager</h6></div>
+            <div class="card-body d-grid gap-2">
+                {% if demande.isPending %}
+                <a href="{{ path('app_manager_process', {id: demande.id}) }}" class="btn btn-warning btn-sm">
+                    <i class="bi bi-check2-square"></i> Traiter cette demande
+                </a>
+                {% elseif demande.isApproved %}
+                <a href="{{ path('app_manager_deliver', {id: demande.id}) }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-truck"></i> Confirmer la livraison
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

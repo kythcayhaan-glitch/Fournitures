@@ -1,0 +1,33 @@
+framework:
+    workflows:
+        demande_materiel:
+            type: state_machine
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: method
+                property: statut
+            supports:
+                - App\Entity\DemandeMateriel
+            initial_marking: pending
+            places:
+                - pending
+                - approved
+                - rejected
+                - delivered
+            transitions:
+                approve:
+                    from: pending
+                    to: approved
+                    metadata:
+                        label: 'Approuver'
+                reject:
+                    from: pending
+                    to: rejected
+                    metadata:
+                        label: 'Rejeter'
+                deliver:
+                    from: approved
+                    to: delivered
+                    metadata:
+                        label: 'Marquer livré'

@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord{% endblock %}
+{% block page_title %}<i class="bi bi-speedometer2"></i> Tableau de bord{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">Tableau de bord</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+
+{# ── Cartes résumé ── #}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 bg-warning bg-opacity-10 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-warning rounded-3 p-3 text-white">
+                    <i class="bi bi-hourglass-split fs-4"></i>
+                </div>
+                <div>
+                    <div class="fs-2 fw-bold">{{ statsParStatut['pending'] ?? 0 }}</div>
+                    <div class="text-muted small">En attente</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 bg-info bg-opacity-10 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-info rounded-3 p-3 text-white">
+                    <i class="bi bi-check-circle fs-4"></i>
+                </div>
+                <div>
+                    <div class="fs-2 fw-bold">{{ statsParStatut['approved'] ?? 0 }}</div>
+                    <div class="text-muted small">Approuvées</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 bg-success bg-opacity-10 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-success rounded-3 p-3 text-white">
+                    <i class="bi bi-truck fs-4"></i>
+                </div>
+                <div>
+                    <div class="fs-2 fw-bold">{{ statsParStatut['delivered'] ?? 0 }}</div>
+                    <div class="text-muted small">Livrées</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 bg-danger bg-opacity-10 h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-danger rounded-3 p-3 text-white">
+                    <i class="bi bi-exclamation-triangle fs-4"></i>
+                </div>
+                <div>
+                    <div class="fs-2 fw-bold">{{ stocksBas|length }}</div>
+                    <div class="text-muted small">Articles stock bas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    {# ── Mes demandes en cours ── #}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-clock"></i> Mes demandes en attente</h6>
+                <a href="{{ path('app_demande_new') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Nouvelle
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if mesDemandesEnCours is empty %}
+                    <p class="text-muted text-center py-4">Aucune demande en attente</p>
+                {% else %}
+                    <ul class="list-group list-group-flush">
+                        {% for demande in mesDemandesEnCours %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{{ path('app_demande_show', {id: demande.id}) }}" class="fw-semibold text-decoration-none">
+                                    {{ demande.reference }}
+                                </a>
+                                <br>
+                                <small class="text-muted">{{ demande.requestedAt|date('d/m/Y H:i') }}
+                                    — {{ demande.lignes|length }} article(s)</small>
+                            </div>
+                            {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ path('app_demande_index') }}" class="btn btn-sm btn-outline-secondary">
+                    Voir toutes mes demandes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# ── Alertes stock bas ── #}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle text-danger"></i> Articles en stock bas</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if stocksBas is empty %}
+                    <p class="text-muted text-center py-4">
+                        <i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i>
+                        Tous les stocks sont à niveau
+                    </p>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Article</th>
+                                    <th class="text-center">Stock</th>
+                                    <th class="text-center">Min.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for f in stocksBas %}
+                                <tr class="stock-bas">
+                                    <td>
+                                        <span class="fw-semibold">{{ f.name }}</span>
+                                        <br><small class="text-muted">{{ f.reference }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-danger">{{ f.stockQuantity }}</span>
+                                    </td>
+                                    <td class="text-center text-muted">{{ f.stockMinimum }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Mouvements récents ── #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history"></i> Mouvements de stock récents</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if mouvementsRecents is empty %}
+                    <p class="text-muted text-center py-3">Aucun mouvement récent</p>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Article</th>
+                                    <th>Type</th>
+                                    <th class="text-center">Qté</th>
+                                    <th>Motif</th>
+                                    <th>Opérateur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in mouvementsRecents %}
+                                <tr>
+                                    <td class="text-muted small">{{ m.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td><strong>{{ m.fourniture.name }}</strong></td>
+                                    <td>
+                                        <span class="badge {{ m.type.badgeClass() }}">{{ m.type.label() }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if m.type.value == 'entree' %}
+                                            <span class="text-success">+{{ m.quantite }}</span>
+                                        {% else %}
+                                            <span class="text-danger">-{{ m.quantite }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small">{{ m.motif|u.truncate(50, '…') }}</td>
+                                    <td class="small">{{ m.operateur.fullName }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
