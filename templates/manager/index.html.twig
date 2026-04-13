@@ -20,6 +20,16 @@
             <span class="badge bg-warning text-dark ms-2">{{ nbEnAttente }} en attente</span>
         {% endif %}
     </h4>
+    {% if is_granted('ROLE_ADMIN') %}
+    <form method="post"
+          action="{{ path('app_admin_demandes_delete_all') }}"
+          onsubmit="return confirm('Supprimer TOUTES les demandes ? Le stock ne sera pas modifié.')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_all_demandes') }}">
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash3"></i> Supprimer toutes
+        </button>
+    </form>
+    {% endif %}
 </div>
 
 {# Filtres #}
@@ -99,6 +109,17 @@
                                        class="btn btn-outline-warning" title="Traiter">
                                         <i class="bi bi-check2-square"></i>
                                     </a>
+                                    {% endif %}
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                    <form method="post"
+                                          action="{{ path('app_admin_demande_delete', {id: demande.id}) }}"
+                                          onsubmit="return confirm('Supprimer la demande {{ demande.reference }} ?')"
+                                          class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_demande_' ~ demande.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>

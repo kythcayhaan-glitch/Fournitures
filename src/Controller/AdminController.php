@@ -10,14 +10,18 @@ use App\Entity\User;
 use App\Form\AjustementStockType;
 use App\Form\CategoryType;
 use App\Form\FournitureType;
+use App\Form\UserCreateType;
 use App\Repository\CategoryRepository;
+use App\Entity\DemandeMateriel;
 use App\Repository\DemandeMaterielRepository;
 use App\Repository\FournitureRepository;
 use App\Repository\MouvementStockRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\FournitureVoter;
+use App\Service\DemandeService;
 use App\Service\StockService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,9 +38,12 @@ class AdminController extends AbstractController
         private readonly CategoryRepository $categoryRepository,
         private readonly UserRepository $userRepository,
         private readonly MouvementStockRepository $mouvementRepository,
+        private readonly DemandeMaterielRepository $demandeRepository,
         private readonly EntityManagerInterface $em,
         private readonly PaginatorInterface $paginator,
         private readonly StockService $stockService,
+        private readonly DemandeService $demandeService,
+        private readonly UserPasswordHasherInterface $hasher,
     ) {}
 
     // ─── FOURNITURES ────────────────────────────────────────────────────────
@@ -45,7 +52,7 @@ class AdminController extends AbstractController
     public function fournitures(Request $request): Response
     {
         $search = $request->query->get('search');
-        $categoryId = $request->query->getInt('category') ?: null;
+        $categoryId = ($c = $request->query->get('category')) && ctype_digit((string) $c) ? (int) $c : null;
         $isActive = $request->query->has('active') ? (bool) $request->query->get('active') : null;
 
         $qb = $this->fournitureRepository->createAdminQueryBuilder(
@@ -198,6 +205,32 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/users/new', name: 'app_admin_users_new', methods: ['GET', 'POST'])]
+    public function userNew(Request $request): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserCreateType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($this->hasher->hashPassword($user, $plainPassword));
+
+            $role = $form->get('role')->getData();
+            $user->setRoles($role === 'ROLE_USER' ? [] : [$role]);
+
+            $this->em->persist($user);
+            $this->em->flush();
+
+            $this->addFlash('success', sprintf('Utilisateur %s créé avec succès.', $user->getFullName()));
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        return $this->render('admin/users/new.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/users/{id}/set-role', name: 'app_admin_users_set_role', methods: ['POST'])]
     public function userSetRole(Request $request, User $user): Response
     {
@@ -322,5 +355,36 @@ class AdminController extends AbstractController
             'from'       => $from,
             'to'         => $to,
         ]);
+    }
+
+    // ─── SUPPRESSION DEMANDES ────────────────────────────────────────────────
+
+    #[Route('/demandes/{id}/delete', name: 'app_admin_demande_delete', methods: ['POST'])]
+    public function demandeDelete(Request $request, DemandeMateriel $demande): Response
+    {
+        if (!$this->isCsrfTokenValid('delete_demande_' . $demande->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_manager_index');
+        }
+
+        $ref = $demande->getReference();
+        $this->demandeService->supprimerDemande($demande);
+        $this->addFlash('success', sprintf('Demande %s supprimée.', $ref));
+
+        return $this->redirectToRoute('app_manager_index');
+    }
+
+    #[Route('/demandes/delete-all', name: 'app_admin_demandes_delete_all', methods: ['POST'])]
+    public function demandesDeleteAll(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('delete_all_demandes', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_manager_index');
+        }
+
+        $count = $this->demandeService->supprimerToutesDemandes();
+        $this->addFlash('success', sprintf('%d demande(s) supprimée(s). Le stock n\'a pas été modifié.', $count));
+
+        return $this->redirectToRoute('app_manager_index');
     }
 }

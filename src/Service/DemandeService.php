@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\DemandeMateriel;
 use App\Entity\LigneDemande;
+use App\Entity\MouvementStock;
 use App\Entity\User;
 use App\Message\NotificationMessage;
 use App\Repository\DemandeMaterielRepository;
@@ -34,6 +35,47 @@ class DemandeService
         $this->bus->dispatch(new NotificationMessage($demande->getId(), 'new_demande'));
 
         return $demande;
+    }
+
+    /**
+     * Supprime une demande sans toucher au stock.
+     * Les mouvements de stock liés sont détachés (demande → null).
+     */
+    public function supprimerDemande(DemandeMateriel $demande): void
+    {
+        $this->em->createQueryBuilder()
+            ->update(MouvementStock::class, 'm')
+            ->set('m.demande', 'NULL')
+            ->where('m.demande = :demande')
+            ->setParameter('demande', $demande)
+            ->getQuery()
+            ->execute();
+
+        $this->em->remove($demande);
+        $this->em->flush();
+    }
+
+    /**
+     * Supprime toutes les demandes sans toucher au stock.
+     */
+    public function supprimerToutesDemandes(): int
+    {
+        $this->em->createQueryBuilder()
+            ->update(MouvementStock::class, 'm')
+            ->set('m.demande', 'NULL')
+            ->where('m.demande IS NOT NULL')
+            ->getQuery()
+            ->execute();
+
+        $demandes = $this->demandeRepository->findAll();
+        $count = count($demandes);
+
+        foreach ($demandes as $demande) {
+            $this->em->remove($demande);
+        }
+        $this->em->flush();
+
+        return $count;
     }
 
     /**

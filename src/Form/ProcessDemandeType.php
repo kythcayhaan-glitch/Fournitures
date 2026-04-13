@@ -24,6 +24,7 @@ class ProcessDemandeType extends AbstractType
                 ],
                 'expanded' => true,
                 'multiple' => false,
+                'data'     => 'approve',
                 'attr'     => ['class' => 'form-check'],
             ])
             ->add('commentaire', TextareaType::class, [

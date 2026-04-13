@@ -73,6 +73,9 @@ class WorkflowSubscriber implements EventSubscriberInterface
 
         /** @var LigneDemande $ligne */
         foreach ($demande->getLignes() as $ligne) {
+            if ($ligne->getQuantiteServie() === 0) {
+                $ligne->setQuantiteServie($ligne->getQuantiteDemandee());
+            }
             $this->stockService->deduireStock($ligne, $user, $demande); // @phpstan-ignore-line
         }
 
