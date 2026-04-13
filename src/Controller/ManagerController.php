@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\DemandeMateriel;
-use App\Form\DeliverDemandeType;
 use App\Form\ProcessDemandeType;
 use App\Repository\DemandeMaterielRepository;
 use App\Repository\FournitureRepository;
@@ -118,44 +117,6 @@ class ManagerController extends AbstractController
         }
 
         return $this->render('manager/process.html.twig', [
-            'form'    => $form,
-            'demande' => $demande,
-        ]);
-    }
-
-    /**
-     * Confirmer la livraison (saisie des quantités servies).
-     */
-    #[Route('/demandes/{id}/deliver', name: 'app_manager_deliver', methods: ['GET', 'POST'])]
-    public function deliver(Request $request, DemandeMateriel $demande): Response
-    {
-        $this->denyAccessUnlessGranted(DemandeVoter::DELIVER, $demande);
-
-        if (!$demande->isApproved()) {
-            $this->addFlash('warning', 'Seules les demandes approuvées peuvent être livrées.');
-            return $this->redirectToRoute('app_manager_index');
-        }
-
-        $form = $this->createForm(DeliverDemandeType::class, $demande);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->demandeMaterielStateMachine->can($demande, 'deliver')) {
-                $this->demandeMaterielStateMachine->apply($demande, 'deliver');
-                $this->em->flush();
-
-                $this->addFlash('success', sprintf(
-                    'La demande %s a été marquée comme livrée et le stock mis à jour.',
-                    $demande->getReference()
-                ));
-            } else {
-                $this->addFlash('error', 'Impossible de marquer cette demande comme livrée.');
-            }
-
-            return $this->redirectToRoute('app_manager_index');
-        }
-
-        return $this->render('manager/deliver.html.twig', [
             'form'    => $form,
             'demande' => $demande,
         ]);

@@ -29,7 +29,6 @@
                 <select name="statut" class="form-select form-select-sm">
                     <option value="">Tous les statuts</option>
                     <option value="pending" {{ statut == 'pending' ? 'selected' : '' }}>En attente</option>
-                    <option value="approved" {{ statut == 'approved' ? 'selected' : '' }}>Approuvées</option>
                     <option value="rejected" {{ statut == 'rejected' ? 'selected' : '' }}>Rejetées</option>
                     <option value="delivered" {{ statut == 'delivered' ? 'selected' : '' }}>Livrées</option>
                 </select>
@@ -70,7 +69,6 @@
                             <th>Date</th>
                             <th class="text-center">Statut</th>
                             <th class="text-center">Articles</th>
-                            <th class="text-end">Montant est.</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -87,7 +85,6 @@
                                 {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
                             </td>
                             <td class="text-center">{{ demande.lignes|length }}</td>
-                            <td class="text-end">{{ demande.montantTotal|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end">
                                 <a href="{{ path('app_demande_show', {id: demande.id}) }}"
                                    class="btn btn-sm btn-outline-secondary">

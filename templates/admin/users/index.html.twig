@@ -59,20 +59,40 @@
                     <td class="text-muted small">{{ user.createdAt|date('d/m/Y') }}</td>
                     <td class="text-center">
                         {% if user != app.user %}
-                        <form method="post"
-                              action="{{ path('app_admin_users_toggle', {id: user.id}) }}"
-                              onsubmit="return confirm('{{ user.isActive ? 'Désactiver' : 'Activer' }} cet utilisateur ?')"
-                              class="d-inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_user_' ~ user.id) }}">
-                            <button type="submit"
-                                    class="btn btn-sm {{ user.isActive ? 'btn-outline-danger' : 'btn-outline-success' }}">
-                                {% if user.isActive %}
-                                    <i class="bi bi-person-x"></i> Désactiver
-                                {% else %}
-                                    <i class="bi bi-person-check"></i> Activer
+                        <div class="d-flex gap-2 justify-content-center align-items-center">
+                            {# Sélecteur de rôle #}
+                            <form method="post"
+                                  action="{{ path('app_admin_users_set_role', {id: user.id}) }}"
+                                  class="d-flex gap-1 align-items-center">
+                                <input type="hidden" name="_token" value="{{ csrf_token('set_role_' ~ user.id) }}">
+                                {% set currentRole = 'ROLE_USER' %}
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    {% set currentRole = 'ROLE_ADMIN' %}
+                                {% elseif 'ROLE_MANAGER' in user.roles %}
+                                    {% set currentRole = 'ROLE_MANAGER' %}
                                 {% endif %}
-                            </button>
-                        </form>
+                                <select name="role" class="form-select form-select-sm" style="width:auto;">
+                                    <option value="ROLE_USER"    {{ currentRole == 'ROLE_USER'    ? 'selected' }}>Utilisateur</option>
+                                    <option value="ROLE_MANAGER" {{ currentRole == 'ROLE_MANAGER' ? 'selected' }}>Manager</option>
+                                    <option value="ROLE_ADMIN"   {{ currentRole == 'ROLE_ADMIN'   ? 'selected' }}>Admin</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Appliquer">
+                                    <i class="bi bi-check2"></i>
+                                </button>
+                            </form>
+                            {# Activation / Désactivation #}
+                            <form method="post"
+                                  action="{{ path('app_admin_users_toggle', {id: user.id}) }}"
+                                  onsubmit="return confirm('{{ user.isActive ? 'Désactiver' : 'Activer' }} cet utilisateur ?')"
+                                  class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle_user_' ~ user.id) }}">
+                                <button type="submit"
+                                        class="btn btn-sm {{ user.isActive ? 'btn-outline-danger' : 'btn-outline-success' }}"
+                                        title="{{ user.isActive ? 'Désactiver' : 'Activer' }}">
+                                    <i class="bi {{ user.isActive ? 'bi-person-x' : 'bi-person-check' }}"></i>
+                                </button>
+                            </form>
+                        </div>
                         {% else %}
                         <span class="text-muted small">—</span>
                         {% endif %}

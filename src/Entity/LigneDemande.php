@@ -83,16 +83,4 @@ class LigneDemande
         return $this;
     }
 
-    /**
-     * Retourne le sous-total de la ligne (quantité servie × prix unitaire).
-     * Si non encore servi, utilise la quantité demandée.
-     */
-    public function getSousTotal(): float
-    {
-        if ($this->fourniture === null) {
-            return 0.0;
-        }
-        $qty = $this->quantiteServie > 0 ? $this->quantiteServie : $this->quantiteDemandee;
-        return $qty * $this->fourniture->getUnitPrice();
-    }
 }

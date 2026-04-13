@@ -7,20 +7,21 @@ namespace App\Service;
 use App\Entity\DemandeMateriel;
 use App\Entity\LigneDemande;
 use App\Entity\User;
+use App\Message\NotificationMessage;
 use App\Repository\DemandeMaterielRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class DemandeService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly DemandeMaterielRepository $demandeRepository,
+        private readonly MessageBusInterface $bus,
     ) {}
 
     /**
      * Crée et persiste une nouvelle demande de matériel.
-     *
-     * @param array{motif: string, lignes: LigneDemande[]} $data
      */
     public function creerDemande(User $user, DemandeMateriel $demande): DemandeMateriel
     {
@@ -29,6 +30,8 @@ class DemandeService
 
         $this->em->persist($demande);
         $this->em->flush();
+
+        $this->bus->dispatch(new NotificationMessage($demande->getId(), 'new_demande'));
 
         return $demande;
     }

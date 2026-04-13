@@ -18,7 +18,6 @@ class DemandeVoter extends Voter
     public const CREATE  = 'DEMANDE_CREATE';
     public const APPROVE = 'DEMANDE_APPROVE';
     public const REJECT  = 'DEMANDE_REJECT';
-    public const DELIVER = 'DEMANDE_DELIVER';
     public const DELETE  = 'DEMANDE_DELETE';
     public const CANCEL  = 'DEMANDE_CANCEL';
 
@@ -26,7 +25,7 @@ class DemandeVoter extends Voter
     {
         if (!in_array($attribute, [
             self::VIEW, self::CREATE, self::APPROVE,
-            self::REJECT, self::DELIVER, self::DELETE, self::CANCEL,
+            self::REJECT, self::DELETE, self::CANCEL,
         ], true)) {
             return false;
         }
@@ -57,7 +56,7 @@ class DemandeVoter extends Voter
         return match ($attribute) {
             self::CREATE  => true, // tout utilisateur authentifié et actif
             self::VIEW    => $this->canView($demande, $user),
-            self::APPROVE, self::REJECT, self::DELIVER => $this->isManager($user),
+            self::APPROVE, self::REJECT => $this->isManager($user),
             self::DELETE  => $this->canDelete($demande, $user),
             self::CANCEL  => $this->canCancel($demande, $user),
             default       => false,

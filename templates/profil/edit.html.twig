@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+{% block page_title %}<i class="bi bi-person-gear"></i> Mon profil{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Mon profil</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<div class="row g-4" style="max-width: 780px;">
+
+    {# ── Informations personnelles ── #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-person"></i> Informations personnelles
+            </div>
+            <div class="card-body">
+                {{ form_start(profilForm, {action: path('app_profil_infos'), method: 'POST'}) }}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form_label(profilForm.firstName) }}</label>
+                        {{ form_widget(profilForm.firstName) }}
+                        {{ form_errors(profilForm.firstName) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form_label(profilForm.lastName) }}</label>
+                        {{ form_widget(profilForm.lastName) }}
+                        {{ form_errors(profilForm.lastName) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{{ form_label(profilForm.email) }}</label>
+                        {{ form_widget(profilForm.email) }}
+                        {{ form_errors(profilForm.email) }}
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2"></i> Enregistrer
+                            </button>
+                            <span class="text-muted small">
+                                <i class="bi bi-shield-lock"></i>
+                                Rôle :
+                                {% for role in app.user.roles %}
+                                    {% if role != 'ROLE_USER' %}
+                                        <span class="badge bg-secondary">{{ role }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="badge bg-light text-dark border">ROLE_USER</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {{ form_end(profilForm) }}
+            </div>
+        </div>
+    </div>
+
+    {# ── Changement de mot de passe ── #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-key"></i> Changer le mot de passe
+            </div>
+            <div class="card-body">
+                {{ form_start(passwordForm, {action: path('app_profil_password'), method: 'POST'}) }}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">{{ form_label(passwordForm.currentPassword) }}</label>
+                        {{ form_widget(passwordForm.currentPassword) }}
+                        {{ form_errors(passwordForm.currentPassword) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form_label(passwordForm.newPassword.first) }}</label>
+                        {{ form_widget(passwordForm.newPassword.first) }}
+                        {{ form_errors(passwordForm.newPassword.first) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form_label(passwordForm.newPassword.second) }}</label>
+                        {{ form_widget(passwordForm.newPassword.second) }}
+                        {{ form_errors(passwordForm.newPassword.second) }}
+                        {{ form_errors(passwordForm.newPassword) }}
+                    </div>
+                    <div class="col-12">
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-info-circle"></i>
+                            8 caractères minimum, avec au moins une majuscule, une minuscule et un chiffre.
+                        </p>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-key"></i> Modifier le mot de passe
+                        </button>
+                    </div>
+                </div>
+                {{ form_end(passwordForm) }}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

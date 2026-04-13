@@ -12,13 +12,12 @@ framework:
             initial_marking: pending
             places:
                 - pending
-                - approved
                 - rejected
                 - delivered
             transitions:
                 approve:
                     from: pending
-                    to: approved
+                    to: delivered
                     metadata:
                         label: 'Approuver'
                 reject:
@@ -26,8 +25,3 @@ framework:
                     to: rejected
                     metadata:
                         label: 'Rejeter'
-                deliver:
-                    from: approved
-                    to: delivered
-                    metadata:
-                        label: 'Marquer livré'

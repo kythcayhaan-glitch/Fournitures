@@ -56,7 +56,6 @@
                         <th>Référence</th>
                         <th>Nom</th>
                         <th>Catégorie</th>
-                        <th class="text-end">Prix unit.</th>
                         <th class="text-center">Stock</th>
                         <th class="text-center">Min.</th>
                         <th class="text-center">Statut</th>
@@ -74,7 +73,6 @@
                             {% endif %}
                         </td>
                         <td>{{ fourniture.category.name }}</td>
-                        <td class="text-end">{{ fourniture.unitPrice|number_format(2, ',', ' ') }} €</td>
                         <td class="text-center">
                             <span class="badge {{ fourniture.isStockBas ? 'bg-danger' : 'bg-success' }}">
                                 {{ fourniture.stockQuantity }}

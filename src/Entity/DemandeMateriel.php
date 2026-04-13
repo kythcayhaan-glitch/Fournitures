@@ -29,7 +29,7 @@ class DemandeMateriel
 
     /**
      * Statut géré par le Workflow Symfony (state machine).
-     * Valeurs possibles : pending, approved, rejected, delivered
+     * Valeurs possibles : pending, rejected, delivered
      */
     #[ORM\Column(length: 20)]
     private string $statut = 'pending';
@@ -180,24 +180,9 @@ class DemandeMateriel
         return $this;
     }
 
-    /**
-     * Calcule le montant total estimé de la demande.
-     */
-    public function getMontantTotal(): float
-    {
-        return array_sum(
-            $this->lignes->map(fn(LigneDemande $l) => $l->getSousTotal())->toArray()
-        );
-    }
-
     public function isPending(): bool
     {
         return $this->statut === 'pending';
-    }
-
-    public function isApproved(): bool
-    {
-        return $this->statut === 'approved';
     }
 
     public function isRejected(): bool

@@ -47,11 +47,6 @@
                 </div>
                 {% endif %}
 
-                <div class="mb-3">
-                    <small class="text-muted d-block">Motif</small>
-                    <p class="mb-0">{{ demande.motif }}</p>
-                </div>
-
                 {% if demande.commentaire %}
                 <div class="alert alert-{{ demande.statut == 'rejected' ? 'danger' : 'info' }} mb-3">
                     <i class="bi bi-chat-text"></i>
@@ -70,8 +65,6 @@
                                 {% if demande.isDelivered %}
                                 <th class="text-center">Qté servie</th>
                                 {% endif %}
-                                <th class="text-end">Prix unit.</th>
-                                <th class="text-end">Sous-total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,17 +80,9 @@
                                     </span>
                                 </td>
                                 {% endif %}
-                                <td class="text-end">{{ ligne.fourniture.unitPrice|number_format(2, ',', ' ') }} €</td>
-                                <td class="text-end fw-semibold">{{ ligne.sousTotal|number_format(2, ',', ' ') }} €</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
-                            <tr class="table-light">
-                                <td colspan="{{ demande.isDelivered ? 5 : 4 }}" class="text-end fw-bold">Total estimé</td>
-                                <td class="text-end fw-bold">{{ demande.montantTotal|number_format(2, ',', ' ') }} €</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -133,10 +118,6 @@
                         <small class="text-muted">Nombre d'articles</small>
                         <br><strong>{{ demande.lignes|length }}</strong>
                     </li>
-                    <li class="mb-2">
-                        <small class="text-muted">Montant estimé</small>
-                        <br><strong>{{ demande.montantTotal|number_format(2, ',', ' ') }} €</strong>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -148,10 +129,6 @@
                 {% if demande.isPending %}
                 <a href="{{ path('app_manager_process', {id: demande.id}) }}" class="btn btn-warning btn-sm">
                     <i class="bi bi-check2-square"></i> Traiter cette demande
-                </a>
-                {% elseif demande.isApproved %}
-                <a href="{{ path('app_manager_deliver', {id: demande.id}) }}" class="btn btn-success btn-sm">
-                    <i class="bi bi-truck"></i> Confirmer la livraison
                 </a>
                 {% endif %}
             </div>

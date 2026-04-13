@@ -35,11 +35,6 @@
                         <div class="fw-semibold">{{ demande.requestedAt|date('d/m/Y à H:i') }}</div>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted">Motif</small>
-                    <p class="mb-0 p-2 bg-light rounded">{{ demande.motif }}</p>
-                </div>
-
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
@@ -47,7 +42,6 @@
                                 <th>Article</th>
                                 <th class="text-center">Qté</th>
                                 <th class="text-center">Stock dispo</th>
-                                <th class="text-end">Sous-total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,16 +62,9 @@
                                         <i class="bi bi-exclamation-triangle text-danger" title="Stock insuffisant"></i>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">{{ ligne.sousTotal|number_format(2, ',', ' ') }} €</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
-                            <tr class="table-light fw-bold">
-                                <td colspan="3" class="text-end">Total</td>
-                                <td class="text-end">{{ demande.montantTotal|number_format(2, ',', ' ') }} €</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>

@@ -117,6 +117,10 @@
         </ul>
 
         <div class="p-3 border-top border-secondary mt-auto">
+            <a href="{{ path('app_profil') }}"
+               class="nav-link mb-1 {% if app.request.attributes.get('_route') starts with 'app_profil' %}active{% endif %}">
+                <i class="bi bi-person-gear"></i> Mon profil
+            </a>
             <a href="{{ path('app_logout') }}" class="nav-link text-danger">
                 <i class="bi bi-box-arrow-left"></i> Déconnexion
             </a>

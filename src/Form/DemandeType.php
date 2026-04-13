@@ -7,7 +7,6 @@ namespace App\Form;
 use App\Entity\DemandeMateriel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,16 +15,6 @@ class DemandeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('motif', TextareaType::class, [
-                'label'      => 'Motif de la demande',
-                'required'   => false,
-                'empty_data' => '',
-                'attr'       => [
-                    'rows'        => 4,
-                    'class'       => 'form-control',
-                    'placeholder' => 'Décrivez la raison de votre demande (optionnel)...',
-                ],
-            ])
             ->add('lignes', CollectionType::class, [
                 'entry_type'    => LigneDemandeType::class,
                 'allow_add'     => true,

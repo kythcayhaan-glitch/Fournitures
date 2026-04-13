@@ -198,6 +198,40 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/users/{id}/set-role', name: 'app_admin_users_set_role', methods: ['POST'])]
+    public function userSetRole(Request $request, User $user): Response
+    {
+        if ($user === $this->getUser()) {
+            $this->addFlash('error', 'Vous ne pouvez pas modifier votre propre rôle.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        if (!$this->isCsrfTokenValid('set_role_' . $user->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        $allowed = ['ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN'];
+        $role = $request->request->get('role');
+
+        if (!in_array($role, $allowed, true)) {
+            $this->addFlash('error', 'Rôle invalide.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        $roles = $role === 'ROLE_USER' ? [] : [$role];
+        $user->setRoles($roles);
+        $this->em->flush();
+
+        $this->addFlash('success', sprintf(
+            'Rôle de %s mis à jour : %s.',
+            $user->getFullName(),
+            $role
+        ));
+
+        return $this->redirectToRoute('app_admin_users');
+    }
+
     #[Route('/users/{id}/toggle', name: 'app_admin_users_toggle', methods: ['POST'])]
     public function userToggle(Request $request, User $user): Response
     {

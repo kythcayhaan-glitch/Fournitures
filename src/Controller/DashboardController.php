@@ -28,15 +28,13 @@ class DashboardController extends AbstractController
         $user = $this->getUser();
 
         $mesDemandesEnCours = $this->demandeRepository->findByStatutAndUser('pending', $user);
-        $mesDemandesApprouvees = $this->demandeRepository->findByStatutAndUser('approved', $user);
         $statsParStatut = $this->demandeRepository->countByStatutForUser($user);
         $stocksBas = $this->stockService->getFournituresStockBas();
         $mouvementsRecents = $this->mouvementRepository->findRecent(10);
 
         return $this->render('dashboard/index.html.twig', [
-            'mesDemandesEnCours'   => $mesDemandesEnCours,
-            'mesDemandesApprouvees' => $mesDemandesApprouvees,
-            'statsParStatut'       => $statsParStatut,
+            'mesDemandesEnCours' => $mesDemandesEnCours,
+            'statsParStatut'     => $statsParStatut,
             'stocksBas'            => $stocksBas,
             'mouvementsRecents'    => $mouvementsRecents,
         ]);
