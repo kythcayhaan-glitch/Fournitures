@@ -14,6 +14,11 @@
 {% endblock %}
 
 {% block body %}
+<div class="mb-3">
+    <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+</div>
 <div class="row g-3">
     <div class="col-lg-8">
         <div class="card">
@@ -62,6 +67,9 @@
                                 <th>Article</th>
                                 <th>Réf.</th>
                                 <th class="text-center">Qté demandée</th>
+                                {% if is_granted('ROLE_MANAGER') %}
+                                <th class="text-center">Stock actuel</th>
+                                {% endif %}
                                 {% if demande.isDelivered %}
                                 <th class="text-center">Qté servie</th>
                                 {% endif %}
@@ -73,6 +81,14 @@
                                 <td>{{ ligne.fourniture.name }}</td>
                                 <td class="text-muted small">{{ ligne.fourniture.reference }}</td>
                                 <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.fourniture.unit }}</td>
+                                {% if is_granted('ROLE_MANAGER') %}
+                                <td class="text-center">
+                                    {% set stock = ligne.fourniture.stockQuantity %}
+                                    <span class="badge {{ stock >= ligne.quantiteDemandee ? 'bg-success' : (stock > 0 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                        {{ stock }} {{ ligne.fourniture.unit }}
+                                    </span>
+                                </td>
+                                {% endif %}
                                 {% if demande.isDelivered %}
                                 <td class="text-center">
                                     <span class="{{ ligne.quantiteServie < ligne.quantiteDemandee ? 'text-warning' : 'text-success' }}">

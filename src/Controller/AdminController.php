@@ -30,7 +30,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_MANAGER')]
 class AdminController extends AbstractController
 {
     public function __construct(
@@ -229,6 +229,68 @@ class AdminController extends AbstractController
         return $this->render('admin/users/new.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/users/{id}/edit', name: 'app_admin_users_edit', methods: ['GET', 'POST'])]
+    public function userEdit(Request $request, User $user): Response
+    {
+        $currentRole = 'ROLE_USER';
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            $currentRole = 'ROLE_ADMIN';
+        } elseif (in_array('ROLE_MANAGER', $user->getRoles(), true)) {
+            $currentRole = 'ROLE_MANAGER';
+        }
+
+        $form = $this->createForm(UserCreateType::class, $user, [
+            'require_password' => false,
+            'show_active'      => true,
+        ]);
+        $form->get('role')->setData($currentRole);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('plainPassword')->getData();
+            if ($plainPassword) {
+                $user->setPassword($this->hasher->hashPassword($user, $plainPassword));
+            }
+
+            $role = $form->get('role')->getData();
+            $user->setRoles($role === 'ROLE_USER' ? [] : [$role]);
+
+            $this->em->flush();
+            $this->addFlash('success', sprintf('Utilisateur %s mis à jour.', $user->getFullName()));
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        return $this->render('admin/users/new.html.twig', [
+            'form' => $form,
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/users/{id}/delete', name: 'app_admin_users_delete', methods: ['POST'])]
+    public function userDelete(Request $request, User $user): Response
+    {
+        if ($user === $this->getUser()) {
+            $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        if ($this->isCsrfTokenValid('delete_user_' . $user->getId(), $request->request->get('_token'))) {
+            if (!$user->getDemandes()->isEmpty() || !$user->getDemandesTraitees()->isEmpty() || !$user->getMouvementsStock()->isEmpty()) {
+                $this->addFlash('error', sprintf(
+                    'Impossible de supprimer %s : il a des demandes ou mouvements de stock associés. Désactivez le compte à la place.',
+                    $user->getFullName()
+                ));
+                return $this->redirectToRoute('app_admin_users');
+            }
+
+            $this->em->remove($user);
+            $this->em->flush();
+            $this->addFlash('success', sprintf('Utilisateur %s supprimé.', $user->getFullName()));
+        }
+
+        return $this->redirectToRoute('app_admin_users');
     }
 
     #[Route('/users/{id}/set-role', name: 'app_admin_users_set_role', methods: ['POST'])]

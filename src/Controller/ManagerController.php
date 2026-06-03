@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\DemandeMateriel;
+use App\Entity\Fourniture;
+use App\Form\AjustementStockType;
 use App\Form\ProcessDemandeType;
 use App\Repository\DemandeMaterielRepository;
 use App\Repository\FournitureRepository;
 use App\Security\Voter\DemandeVoter;
+use App\Service\StockService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +31,7 @@ class ManagerController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly PaginatorInterface $paginator,
         private readonly WorkflowInterface $demandeMaterielStateMachine,
+        private readonly StockService $stockService,
     ) {}
 
     /**
@@ -119,6 +123,40 @@ class ManagerController extends AbstractController
         return $this->render('manager/process.html.twig', [
             'form'    => $form,
             'demande' => $demande,
+        ]);
+    }
+
+    #[Route('/stock/{id}/ajuster', name: 'app_manager_ajuster', methods: ['GET', 'POST'])]
+    public function ajusterStock(Request $request, Fourniture $fourniture): Response
+    {
+        $form = $this->createForm(AjustementStockType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $data = $form->getData();
+
+            $this->stockService->ajustementStock(
+                $fourniture,
+                (int) $data['nouvelleQuantite'],
+                (string) ($data['motif'] ?? ''),
+                $user
+            );
+
+            $this->addFlash('success', sprintf(
+                'Stock de "%s" ajusté à %d %s.',
+                $fourniture->getName(),
+                $data['nouvelleQuantite'],
+                $fourniture->getUnit()
+            ));
+
+            return $this->redirectToRoute('app_manager_stock');
+        }
+
+        return $this->render('admin/inventaire_ajuster.html.twig', [
+            'form'       => $form,
+            'fourniture' => $fourniture,
         ]);
     }
 

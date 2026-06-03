@@ -47,13 +47,13 @@ class FournitureVoter extends Voter
 
         return match ($attribute) {
             self::VIEW   => true, // tout utilisateur authentifié et actif
-            self::CREATE, self::EDIT, self::DELETE => $this->isAdmin($user),
+            self::CREATE, self::EDIT, self::DELETE => $this->isAdminOrManager($user),
             default      => false,
         };
     }
 
-    private function isAdmin(User $user): bool
+    private function isAdminOrManager(User $user): bool
     {
-        return in_array('ROLE_ADMIN', $user->getRoles(), true);
+        return $user->isAdmin() || $user->isManager();
     }
 }

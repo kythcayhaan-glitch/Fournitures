@@ -28,15 +28,19 @@ class DashboardController extends AbstractController
         $user = $this->getUser();
 
         $mesDemandesEnCours = $this->demandeRepository->findByStatutAndUser('pending', $user);
+        $mesDemandes = $this->demandeRepository->findByUserWithFilters($user)->setMaxResults(10)->getQuery()->getResult();
         $statsParStatut = $this->demandeRepository->countByStatutForUser($user);
         $stocksBas = $this->stockService->getFournituresStockBas();
         $mouvementsRecents = $this->mouvementRepository->findRecent(10);
+        $demandesEnAttente = $this->demandeRepository->findPending();
 
         return $this->render('dashboard/index.html.twig', [
             'mesDemandesEnCours' => $mesDemandesEnCours,
+            'mesDemandes'        => $mesDemandes,
             'statsParStatut'     => $statsParStatut,
-            'stocksBas'            => $stocksBas,
-            'mouvementsRecents'    => $mouvementsRecents,
+            'stocksBas'          => $stocksBas,
+            'mouvementsRecents'  => $mouvementsRecents,
+            'demandesEnAttente'  => $demandesEnAttente,
         ]);
     }
 }

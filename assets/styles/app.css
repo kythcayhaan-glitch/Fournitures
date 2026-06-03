@@ -1,3 +1,9 @@
 body {
     background-color: lightgray;
 }
+
+.table-sm td,
+.table-sm th {
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+}

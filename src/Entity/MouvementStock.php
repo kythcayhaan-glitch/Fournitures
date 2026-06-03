@@ -32,9 +32,8 @@ class MouvementStock
     #[ORM\Column(type: 'integer')]
     private int $quantiteApres = 0;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    private string $motif = '';
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $motif = null;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -105,12 +104,12 @@ class MouvementStock
         return $this;
     }
 
-    public function getMotif(): string
+    public function getMotif(): ?string
     {
         return $this->motif;
     }
 
-    public function setMotif(string $motif): static
+    public function setMotif(?string $motif): static
     {
         $this->motif = $motif;
         return $this;

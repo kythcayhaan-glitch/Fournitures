@@ -6,7 +6,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,11 +26,7 @@ class ProfilType extends AbstractType
                 'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
                 'attr'        => ['class' => 'form-control'],
             ])
-            ->add('email', EmailType::class, [
-                'label'       => 'Adresse email',
-                'constraints' => [new Assert\NotBlank(), new Assert\Email()],
-                'attr'        => ['class' => 'form-control'],
-            ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

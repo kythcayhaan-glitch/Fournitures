@@ -24,17 +24,17 @@
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
                 <div class="mb-3">
-                    <label for="email" class="form-label fw-semibold">Adresse email</label>
+                    <label for="lastName" class="form-label fw-semibold">Nom</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email"
-                               id="email"
-                               name="email"
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text"
+                               id="lastName"
+                               name="lastName"
                                class="form-control"
                                value="{{ last_username }}"
-                               autocomplete="email"
+                               autocomplete="username"
                                autofocus
-                               placeholder="votre@email.com"
+                               placeholder="Votre nom"
                                required>
                     </div>
                 </div>

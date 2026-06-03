@@ -6,7 +6,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: lastName
 
     firewalls:
         dev:
@@ -21,7 +21,7 @@ security:
                 check_path: app_login
                 enable_csrf: true
                 default_target_path: app_dashboard
-                username_parameter: email
+                username_parameter: lastName
                 password_parameter: password
             logout:
                 path: app_logout
@@ -33,7 +33,7 @@ security:
 
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_MANAGER }
         - { path: ^/manager, roles: ROLE_MANAGER }
         - { path: ^/, roles: ROLE_USER }
 

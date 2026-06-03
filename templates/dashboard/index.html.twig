@@ -14,9 +14,11 @@
 {% block body %}
 
 {# ── Cartes résumé ── #}
+{% if is_granted('ROLE_MANAGER') %}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 bg-warning bg-opacity-10 h-100">
+        <a href="{{ path('app_manager_index', {statut: 'pending'}) }}" class="text-decoration-none">
+        <div class="card border-0 bg-warning bg-opacity-10 h-100 cursor-pointer">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-warning rounded-3 p-3 text-white">
                     <i class="bi bi-hourglass-split fs-4"></i>
@@ -27,9 +29,11 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 bg-danger bg-opacity-10 h-100">
+        <a href="{{ path('app_manager_index', {statut: 'rejected'}) }}" class="text-decoration-none">
+        <div class="card border-0 bg-danger bg-opacity-10 h-100 cursor-pointer">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-danger rounded-3 p-3 text-white">
                     <i class="bi bi-x-circle fs-4"></i>
@@ -40,9 +44,11 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 bg-success bg-opacity-10 h-100">
+        <a href="{{ path('app_manager_index', {statut: 'delivered'}) }}" class="text-decoration-none">
+        <div class="card border-0 bg-success bg-opacity-10 h-100 cursor-pointer">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-success rounded-3 p-3 text-white">
                     <i class="bi bi-truck fs-4"></i>
@@ -53,9 +59,11 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 bg-danger bg-opacity-10 h-100">
+        <a href="{{ path('app_admin_inventaire') }}" class="text-decoration-none">
+        <div class="card border-0 bg-danger bg-opacity-10 h-100 cursor-pointer">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-danger rounded-3 p-3 text-white">
                     <i class="bi bi-exclamation-triangle fs-4"></i>
@@ -66,49 +74,92 @@
                 </div>
             </div>
         </div>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if is_granted('ROLE_MANAGER') and demandesEnAttente is not empty %}
+<div class="card mb-3 border-warning">
+    <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-hourglass-split text-warning"></i> Demandes en attente de traitement
+            <span class="badge bg-warning text-dark ms-2">{{ demandesEnAttente|length }}</span>
+        </h6>
+        <a href="{{ path('app_manager_index', {statut: 'pending'}) }}" class="btn btn-sm btn-outline-warning">Voir toutes</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Référence</th>
+                    <th>Demandeur</th>
+                    <th>Date</th>
+                    <th class="text-center">Articles</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandesEnAttente %}
+                <tr class="cursor-pointer" onclick="window.location='{{ path('app_demande_show', {id: demande.id}) }}'">
+                    <td class="fw-semibold">{{ demande.reference }}</td>
+                    <td>{{ demande.requester.fullName }}</td>
+                    <td class="text-muted small">{{ demande.requestedAt|date('d/m/Y H:i') }}</td>
+                    <td class="text-center">{{ demande.lignes|length }}</td>
+                    <td class="text-center">
+                        <a href="{{ path('app_manager_process', {id: demande.id}) }}"
+                           class="btn btn-sm btn-warning" onclick="event.stopPropagation()">
+                            <i class="bi bi-check2-square"></i> Traiter
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-clipboard-list"></i> Mes demandes</h6>
+        <a href="{{ path('app_demande_new') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> Nouvelle demande
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if mesDemandes is empty %}
+            <p class="text-muted text-center py-4">Aucune demande</p>
+        {% else %}
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Référence</th>
+                        <th>Date</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-center">Articles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for demande in mesDemandes %}
+                    <tr class="cursor-pointer" onclick="window.location='{{ path('app_demande_show', {id: demande.id}) }}'">
+                        <td class="fw-semibold">{{ demande.reference }}</td>
+                        <td class="text-muted small">{{ demande.requestedAt|date('d/m/Y H:i') }}</td>
+                        <td class="text-center">{{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}</td>
+                        <td class="text-center">{{ demande.lignes|length }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+    <div class="card-footer">
+        <a href="{{ path('app_demande_index') }}" class="btn btn-sm btn-outline-secondary">Voir toutes</a>
     </div>
 </div>
 
 <div class="row g-3">
-    {# ── Mes demandes en cours ── #}
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-clock"></i> Mes demandes en attente</h6>
-                <a href="{{ path('app_demande_new') }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus"></i> Nouvelle
-                </a>
-            </div>
-            <div class="card-body p-0">
-                {% if mesDemandesEnCours is empty %}
-                    <p class="text-muted text-center py-4">Aucune demande en attente</p>
-                {% else %}
-                    <ul class="list-group list-group-flush">
-                        {% for demande in mesDemandesEnCours %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <a href="{{ path('app_demande_show', {id: demande.id}) }}" class="fw-semibold text-decoration-none">
-                                    {{ demande.reference }}
-                                </a>
-                                <br>
-                                <small class="text-muted">{{ demande.requestedAt|date('d/m/Y H:i') }}
-                                    — {{ demande.lignes|length }} article(s)</small>
-                            </div>
-                            {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
-            <div class="card-footer">
-                <a href="{{ path('app_demande_index') }}" class="btn btn-sm btn-outline-secondary">
-                    Voir toutes mes demandes
-                </a>
-            </div>
-        </div>
-    </div>
-
     {# ── Alertes stock bas ── #}
+    {% if is_granted('ROLE_MANAGER') %}
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header">
@@ -132,7 +183,11 @@
                             </thead>
                             <tbody>
                                 {% for f in stocksBas %}
+                                {% if is_granted('ROLE_MANAGER') %}
+                                <tr class="stock-bas cursor-pointer" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: f.id}) }}'">
+                                {% else %}
                                 <tr class="stock-bas">
+                                {% endif %}
                                     <td>
                                         <span class="fw-semibold">{{ f.name }}</span>
                                         <br><small class="text-muted">{{ f.reference }}</small>
@@ -150,8 +205,10 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     {# ── Mouvements récents ── #}
+    {% if is_granted('ROLE_MANAGER') %}
     <div class="col-12">
         <div class="card">
             <div class="card-header">
@@ -199,6 +256,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 {% endblock %}

@@ -1,14 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvel utilisateur{% endblock %}
-{% block page_title %}<i class="bi bi-person-plus"></i> Nouvel utilisateur{% endblock %}
+{% set is_edit = user is defined and user.id is not null %}
+
+{% block title %}{{ is_edit ? 'Modifier ' ~ user.fullName : 'Nouvel utilisateur' }}{% endblock %}
+{% block page_title %}
+    <i class="bi bi-person-{{ is_edit ? 'gear' : 'plus' }}"></i>
+    {{ is_edit ? 'Modifier ' ~ user.fullName : 'Nouvel utilisateur' }}
+{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
         <li class="breadcrumb-item"><a href="{{ path('app_admin_users') }}">Utilisateurs</a></li>
-        <li class="breadcrumb-item active">Nouveau</li>
+        <li class="breadcrumb-item active">{{ is_edit ? 'Modifier' : 'Nouveau' }}</li>
     </ol>
 </nav>
 {% endblock %}
@@ -18,7 +23,8 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header fw-semibold">
-                <i class="bi bi-person-plus"></i> Créer un utilisateur
+                <i class="bi bi-person-{{ is_edit ? 'gear' : 'plus' }}"></i>
+                {{ is_edit ? 'Modifier l\'utilisateur' : 'Créer un utilisateur' }}
             </div>
             <div class="card-body">
                 {{ form_start(form) }}
@@ -32,11 +38,6 @@
                         {{ form_label(form.lastName) }}
                         {{ form_widget(form.lastName) }}
                         {{ form_errors(form.lastName) }}
-                    </div>
-                    <div class="col-12">
-                        {{ form_label(form.email) }}
-                        {{ form_widget(form.email) }}
-                        {{ form_errors(form.email) }}
                     </div>
                     <div class="col-md-6">
                         {{ form_label(form.plainPassword.first) }}
@@ -54,9 +55,18 @@
                         {{ form_widget(form.role) }}
                         {{ form_errors(form.role) }}
                     </div>
+                    {% if form.isActive is defined %}
+                    <div class="col-12">
+                        <div class="form-check">
+                            {{ form_widget(form.isActive) }}
+                            {{ form_label(form.isActive, null, {label_attr: {class: 'form-check-label'}}) }}
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="col-12 d-flex gap-2 mt-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-person-check"></i> Créer l'utilisateur
+                            <i class="bi bi-{{ is_edit ? 'floppy' : 'person-check' }}"></i>
+                            {{ is_edit ? 'Enregistrer' : 'Créer l\'utilisateur' }}
                         </button>
                         <a href="{{ path('app_admin_users') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Annuler

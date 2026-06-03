@@ -30,8 +30,9 @@ class LigneDemandeType extends AbstractType
                 'attr'         => ['class' => 'form-select select-fourniture'],
             ])
             ->add('quantiteDemandee', IntegerType::class, [
-                'label' => 'Quantité',
-                'attr'  => [
+                'label'      => 'Quantité',
+                'empty_data' => 1,
+                'attr'       => [
                     'min'   => 1,
                     'class' => 'form-control',
                 ],

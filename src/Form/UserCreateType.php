@@ -6,8 +6,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,16 +30,12 @@ class UserCreateType extends AbstractType
                 'attr'        => ['class' => 'form-control'],
                 'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
             ])
-            ->add('email', EmailType::class, [
-                'label'       => 'Adresse email',
-                'attr'        => ['class' => 'form-control'],
-                'constraints' => [new Assert\NotBlank(), new Assert\Email()],
-            ])
             ->add('plainPassword', RepeatedType::class, [
                 'type'            => PasswordType::class,
                 'mapped'          => false,
+                'required'        => $options['require_password'],
                 'first_options'   => [
-                    'label' => 'Mot de passe',
+                    'label' => $options['require_password'] ? 'Mot de passe' : 'Nouveau mot de passe (laisser vide pour ne pas changer)',
                     'attr'  => ['class' => 'form-control', 'autocomplete' => 'new-password'],
                 ],
                 'second_options'  => [
@@ -47,29 +43,38 @@ class UserCreateType extends AbstractType
                     'attr'  => ['class' => 'form-control', 'autocomplete' => 'new-password'],
                 ],
                 'invalid_message' => 'Les mots de passe ne correspondent pas.',
-                'constraints'     => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.'),
-                ],
+                'constraints'     => $options['require_password']
+                    ? [new Assert\NotBlank(), new Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
+                    : [new Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')],
             ])
             ->add('role', ChoiceType::class, [
-                'label'    => 'Rôle',
-                'mapped'   => false,
-                'choices'  => [
+                'label'   => 'Rôle',
+                'mapped'  => false,
+                'choices' => [
                     'Utilisateur' => 'ROLE_USER',
                     'Manager'     => 'ROLE_MANAGER',
                     'Admin'       => 'ROLE_ADMIN',
                 ],
-                'attr'     => ['class' => 'form-select'],
-                'data'     => 'ROLE_USER',
+                'attr'    => ['class' => 'form-select'],
+                'data'    => 'ROLE_USER',
             ])
         ;
+
+        if ($options['show_active']) {
+            $builder->add('isActive', CheckboxType::class, [
+                'label'    => 'Compte actif',
+                'required' => false,
+                'attr'     => ['class' => 'form-check-input'],
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class'       => User::class,
+            'require_password' => true,
+            'show_active'      => false,
         ]);
     }
 }

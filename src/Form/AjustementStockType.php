@@ -23,9 +23,9 @@ class AjustementStockType extends AbstractType
                 'constraints' => [new NotBlank(), new PositiveOrZero()],
             ])
             ->add('motif', TextType::class, [
-                'label' => 'Motif de l\'ajustement',
-                'attr'  => ['class' => 'form-control', 'placeholder' => 'Ex: Inventaire physique du 01/01/2025'],
-                'constraints' => [new NotBlank()],
+                'label'    => 'Motif de l\'ajustement',
+                'required' => false,
+                'attr'     => ['class' => 'form-control', 'placeholder' => 'Ex: Inventaire physique du 01/01/2025'],
             ])
         ;
     }
