@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Vue Stock{% endblock %}
-{% block page_title %}<i class="bi bi-boxes"></i> Vue d'ensemble du stock{% endblock %}
+{% block page_title %}<i class="bi bi-boxes"></i> Gestion du stock{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -17,29 +17,39 @@
 {% if stocksBas|length > 0 %}
 <div class="alert alert-danger d-flex align-items-center gap-2">
     <i class="bi bi-exclamation-triangle-fill fs-4"></i>
-    <div>
-        <strong>{{ stocksBas|length }} article(s) en stock bas !</strong>
-        Une commande de réapprovisionnement est recommandée.
-    </div>
+    <div><strong>{{ stocksBas|length }} article(s) en stock bas !</strong> Une commande de réapprovisionnement est recommandée.</div>
 </div>
 {% endif %}
 
-{# Filtre #}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span></span>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_admin_historique') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-clock-history"></i> Historique
+        </a>
+        <a href="{{ path('app_admin_fournitures_new') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Nouvelle fourniture
+        </a>
+    </div>
+</div>
+
 <div class="card mb-3">
-    <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-8">
-                <input type="text" name="search" class="form-control form-control-sm"
-                       placeholder="Rechercher par nom ou référence..." value="{{ search ?? '' }}">
-            </div>
-            <div class="col-md-4 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-search"></i> Rechercher
-                </button>
-                <a href="{{ path('app_manager_stock') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x"></i>
-                </a>
-            </div>
+    <div class="card-body py-2">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="text" name="search" class="form-control form-control-sm"
+                   placeholder="Rechercher..." value="{{ search ?? '' }}">
+            <select name="category" class="form-select form-select-sm" style="min-width:160px" onchange="this.form.submit()">
+                <option value="">Toutes catégories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {{ categoryId == cat.id ? 'selected' : '' }}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                <i class="bi bi-filter"></i> Filtrer
+            </button>
+            <a href="{{ path('app_manager_stock') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-x"></i>
+            </a>
         </form>
     </div>
 </div>
@@ -47,19 +57,59 @@
 <div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-sm table-hover mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Article</th>
                         <th>Catégorie</th>
-                        <th class="text-center">Stock actuel</th>
-                        <th class="text-center">Stock min.</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-center">Min.</th>
                         <th class="text-center">Statut</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for fourniture in pagination %}
-                        {{ include('components/ligne_stock.html.twig', {fourniture: fourniture, show_actions: false}) }}
+                    {% set is_low = fourniture.stockQuantity <= fourniture.stockMinimum %}
+                    <tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}'">
+                        <td><strong>{{ fourniture.name }}</strong> <small class="text-muted">{{ fourniture.reference }}</small></td>
+                        <td>{{ fourniture.category ? fourniture.category.name : '—' }}</td>
+                        <td class="text-center">
+                            <span class="badge {{ is_low ? 'bg-danger' : 'bg-success' }}">
+                                {{ fourniture.stockQuantity }}
+                            </span>
+                            <small class="text-muted">{{ fourniture.unit }}</small>
+                        </td>
+                        <td class="text-center text-muted">{{ fourniture.stockMinimum }}</td>
+                        <td class="text-center">
+                            {% if is_low %}
+                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Stock bas</span>
+                            {% else %}
+                                <span class="badge bg-success"><i class="bi bi-check"></i> OK</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center" onclick="event.stopPropagation()">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}"
+                                   class="btn btn-outline-primary" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
+                                   class="btn btn-outline-secondary" title="Ajuster stock">
+                                    <i class="bi bi-clipboard-data"></i>
+                                </a>
+                                <form method="post"
+                                      action="{{ path('app_admin_fournitures_delete', {id: fourniture.id}) }}"
+                                      onsubmit="return confirm('Désactiver {{ fourniture.name }} ?')"
+                                      class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_fourniture_' ~ fourniture.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger" title="Désactiver">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

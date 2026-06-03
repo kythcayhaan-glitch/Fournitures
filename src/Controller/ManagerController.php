@@ -8,6 +8,7 @@ use App\Entity\DemandeMateriel;
 use App\Entity\Fourniture;
 use App\Form\AjustementStockType;
 use App\Form\ProcessDemandeType;
+use App\Repository\CategoryRepository;
 use App\Repository\DemandeMaterielRepository;
 use App\Repository\FournitureRepository;
 use App\Security\Voter\DemandeVoter;
@@ -28,6 +29,7 @@ class ManagerController extends AbstractController
     public function __construct(
         private readonly DemandeMaterielRepository $demandeRepository,
         private readonly FournitureRepository $fournitureRepository,
+        private readonly CategoryRepository $categoryRepository,
         private readonly EntityManagerInterface $em,
         private readonly PaginatorInterface $paginator,
         private readonly WorkflowInterface $demandeMaterielStateMachine,
@@ -167,7 +169,7 @@ class ManagerController extends AbstractController
     public function stock(Request $request): Response
     {
         $search = $request->query->get('search');
-        $categoryId = $request->query->getInt('category') ?: null;
+        $categoryId = ($c = $request->query->get('category')) && ctype_digit((string) $c) ? (int) $c : null;
 
         $qb = $this->fournitureRepository->createAdminQueryBuilder(
             $search ?: null,
@@ -181,12 +183,15 @@ class ManagerController extends AbstractController
             25
         );
 
-        $stocksBas = $this->fournitureRepository->findStockBas();
+        $stocksBas  = $this->fournitureRepository->findStockBas();
+        $categories = $this->categoryRepository->findAllOrderedByName();
 
         return $this->render('manager/stock.html.twig', [
-            'pagination' => $pagination,
-            'stocksBas'  => $stocksBas,
-            'search'     => $search,
+            'pagination'  => $pagination,
+            'stocksBas'   => $stocksBas,
+            'categories'  => $categories,
+            'search'      => $search,
+            'categoryId'  => $categoryId,
         ]);
     }
 }

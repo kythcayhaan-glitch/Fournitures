@@ -162,8 +162,13 @@
     {% if is_granted('ROLE_MANAGER') %}
     <div class="col-lg-6">
         <div class="card h-100">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="bi bi-exclamation-triangle text-danger"></i> Articles en stock bas</h6>
+                {% if stocksBas|length > 3 %}
+                    <a href="{{ path('app_admin_inventaire') }}" class="btn btn-sm btn-outline-danger">
+                        Voir les {{ stocksBas|length }} articles
+                    </a>
+                {% endif %}
             </div>
             <div class="card-body p-0">
                 {% if stocksBas is empty %}
@@ -182,7 +187,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for f in stocksBas %}
+                                {% for f in stocksBas|slice(0, 3) %}
                                 {% if is_granted('ROLE_MANAGER') %}
                                 <tr class="stock-bas cursor-pointer" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: f.id}) }}'">
                                 {% else %}
