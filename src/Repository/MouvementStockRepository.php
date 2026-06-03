@@ -42,6 +42,23 @@ class MouvementStockRepository extends ServiceEntityRepository
      *
      * @return MouvementStock[]
      */
+    public function findToday(): array
+    {
+        $debut = new \DateTimeImmutable('today');
+        $fin   = new \DateTimeImmutable('tomorrow');
+
+        return $this->createQueryBuilder('m')
+            ->leftJoin('m.fourniture', 'f')->addSelect('f')
+            ->leftJoin('m.operateur', 'u')->addSelect('u')
+            ->andWhere('m.createdAt >= :debut')
+            ->andWhere('m.createdAt < :fin')
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->orderBy('m.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findRecent(int $limit = 50): array
     {
         return $this->createQueryBuilder('m')

@@ -2,67 +2,107 @@
 
 {% block title %}Connexion — Gestion Fournitures{% endblock %}
 
+{% block stylesheets %}
+<style>
+body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important; min-height: 100vh; }
+.login-changelog { font-size: .8rem; }
+.login-changelog .badge-date { font-size: .7rem; font-weight: 500; }
+.login-changelog .list-group-item { padding: .45rem .75rem; }
+.login-changelog .text-muted { font-size: .75rem; }
+.login-changelog-scroll { max-height: 340px; overflow-y: auto; }
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="min-vh-100 d-flex align-items-center justify-content-center"
-     style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-    <div class="card shadow-lg" style="width: 100%; max-width: 420px;">
-        <div class="card-body p-5">
-            <div class="text-center mb-4">
-                <i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i>
-                <h2 class="mt-2 fw-bold">Fournitures Bureau</h2>
-                <p class="text-muted">Connectez-vous à votre espace</p>
-            </div>
+<div class="row justify-content-center mb-4">
 
-            {% if error %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    {{ error.messageKey | trans(error.messageData, 'security') }}
-                </div>
-            {% endif %}
-
-            <form method="post" action="{{ path('app_login') }}" novalidate>
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-                <div class="mb-3">
-                    <label for="lastName" class="form-label fw-semibold">Nom</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text"
-                               id="lastName"
-                               name="lastName"
-                               class="form-control"
-                               value="{{ last_username }}"
-                               autocomplete="username"
-                               autofocus
-                               placeholder="Votre nom"
-                               required>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="password" class="form-label fw-semibold">Mot de passe</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password"
-                               id="password"
-                               name="password"
-                               class="form-control"
-                               autocomplete="current-password"
-                               placeholder="••••••••"
-                               required>
-                    </div>
-                </div>
-
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-box-arrow-in-right"></i> Se connecter
-                    </button>
-                </div>
-            </form>
+    {# ── Formulaire ── #}
+    <div class="col-12 col-md-5 col-lg-4">
+        <div class="text-center mb-4">
+            <i class="bi bi-box-seam text-primary" style="font-size:3rem"></i>
+            <h1 class="h3 mt-2 fw-bold text-white">Fournitures Bureau</h1>
         </div>
-        <div class="card-footer text-center text-muted small py-3">
-            Gestion des fournitures de bureau &copy; {{ "now"|date("Y") }}
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        {{ error.messageKey == 'Invalid credentials.' ? 'Nom ou mot de passe incorrect.' : error.messageKey|trans({}, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{{ path('app_login') }}" novalidate>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label fw-semibold">Nom</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" id="lastName" name="lastName" class="form-control"
+                                   value="{{ last_username }}" autocomplete="username" autofocus required placeholder="Votre nom">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Mot de passe</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" id="password" name="password" class="form-control"
+                                   autocomplete="current-password" required placeholder="••••••••">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Se connecter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# ── Nouveautés ── #}
+{% if changelog is not empty %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-7">
+        <div class="card shadow-sm login-changelog">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-stars me-1 text-warning"></i>Nouveautés
+            </div>
+            <ul class="list-group list-group-flush login-changelog-scroll">
+                {% for entry in changelog %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span><i class="bi {{ entry.icon }} me-1 {{ entry.color }}"></i><strong>{{ entry.titre }}</strong></span>
+                        <span class="badge bg-secondary badge-date ms-2">{{ entry.date }}</span>
+                    </div>
+                    <div class="text-muted mt-1">{{ entry.description }}</div>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.getElementById('togglePassword').addEventListener('click', function () {
+    var input = document.getElementById('password');
+    var icon  = document.getElementById('togglePasswordIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+});
+</script>
 {% endblock %}

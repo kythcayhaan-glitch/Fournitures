@@ -1,0 +1,30 @@
+changelog:
+  - date: "03/06/2026"
+    icon: "bi-rocket-takeoff"
+    color: "text-success"
+    titre: "Mise en ligne de l'application"
+    description: "Première version de l'application de gestion des fournitures de bureau. Catalogue de 286 articles importé depuis l'ancien système."
+
+  - date: "03/06/2026"
+    icon: "bi-boxes"
+    color: "text-primary"
+    titre: "Vue stock complète"
+    description: "Gestion des fournitures centralisée dans une seule vue : ajout, édition, ajustement de stock, suppression, filtre par catégorie."
+
+  - date: "03/06/2026"
+    icon: "bi-clipboard-plus"
+    color: "text-info"
+    titre: "Demandes de matériel"
+    description: "Les utilisateurs peuvent créer, modifier et supprimer leurs demandes en attente. Les managers les valident ou les rejettent."
+
+  - date: "03/06/2026"
+    icon: "bi-exclamation-triangle"
+    color: "text-warning"
+    titre: "Alerte rupture de stock"
+    description: "Lors de la soumission d'une demande, une modale avertit l'utilisateur si un article sélectionné est en rupture de stock."
+
+  - date: "03/06/2026"
+    icon: "bi-speedometer2"
+    color: "text-danger"
+    titre: "Tableau de bord"
+    description: "Dashboard avec alertes stock bas, demandes en attente pour les managers, et historique des mouvements de stock."
