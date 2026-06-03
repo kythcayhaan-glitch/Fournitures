@@ -101,6 +101,39 @@ class DemandeController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/edit', name: 'app_demande_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, DemandeMateriel $demande): Response
+    {
+        $this->denyAccessUnlessGranted(DemandeVoter::EDIT, $demande);
+
+        $form = $this->createForm(DemandeType::class, $demande);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->em->flush();
+            $this->addFlash('success', 'Demande mise à jour.');
+            return $this->redirectToRoute('app_demande_show', ['id' => $demande->getId()]);
+        }
+
+        return $this->render('demande/new.html.twig', [
+            'form'    => $form,
+            'demande' => $demande,
+        ]);
+    }
+
+    #[Route('/{id}/delete', name: 'app_demande_delete_user', methods: ['POST'])]
+    public function delete(Request $request, DemandeMateriel $demande): Response
+    {
+        $this->denyAccessUnlessGranted(DemandeVoter::EDIT, $demande);
+
+        if ($this->isCsrfTokenValid('delete_demande_user_' . $demande->getId(), $request->request->get('_token'))) {
+            $this->demandeService->supprimerDemande($demande);
+            $this->addFlash('success', 'Demande supprimée.');
+        }
+
+        return $this->redirectToRoute('app_demande_index');
+    }
+
     /**
      * Annulation d'une demande en attente par son auteur.
      */

@@ -60,6 +60,23 @@
                 {% endif %}
 
                 <h6 class="fw-bold mt-4 mb-3"><i class="bi bi-list-ul"></i> Articles demandés</h6>
+
+                {% if demande.isPending %}
+                    {% set indispos = [] %}
+                    {% for ligne in demande.lignes %}
+                        {% if ligne.fourniture.stockQuantity == 0 %}
+                            {% set indispos = indispos|merge([ligne.fourniture.name]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if indispos is not empty %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Article(s) en rupture de stock :</strong>
+                        vous ne recevrez pas : {{ indispos|join(', ') }}.
+                    </div>
+                    {% endif %}
+                {% endif %}
+
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
                         <thead class="table-light">
@@ -77,6 +94,7 @@
                         </thead>
                         <tbody>
                             {% for ligne in demande.lignes %}
+                            {% if demande.isPending and ligne.fourniture.stockQuantity == 0 %}{% else %}
                             <tr>
                                 <td>{{ ligne.fourniture.name }}</td>
                                 <td class="text-muted small">{{ ligne.fourniture.reference }}</td>
@@ -97,19 +115,23 @@
                                 </td>
                                 {% endif %}
                             </tr>
+                            {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {% if demande.isPending and is_granted('DEMANDE_CANCEL', demande) %}
-            <div class="card-footer">
-                <form method="post" action="{{ path('app_demande_cancel', {id: demande.id}) }}"
-                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">
-                    <input type="hidden" name="_token" value="{{ csrf_token('cancel_demande_' ~ demande.id) }}">
+            {% if demande.isPending and is_granted('DEMANDE_EDIT', demande) %}
+            <div class="card-footer d-flex gap-2">
+                <a href="{{ path('app_demande_edit', {id: demande.id}) }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <form method="post" action="{{ path('app_demande_delete_user', {id: demande.id}) }}"
+                      onsubmit="return confirm('Supprimer définitivement cette demande ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_demande_user_' ~ demande.id) }}">
                     <button type="submit" class="btn btn-outline-danger btn-sm">
-                        <i class="bi bi-x-circle"></i> Annuler ma demande
+                        <i class="bi bi-trash"></i> Supprimer
                     </button>
                 </form>
             </div>

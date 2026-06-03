@@ -16,6 +16,7 @@ class DemandeVoter extends Voter
 {
     public const VIEW    = 'DEMANDE_VIEW';
     public const CREATE  = 'DEMANDE_CREATE';
+    public const EDIT    = 'DEMANDE_EDIT';
     public const APPROVE = 'DEMANDE_APPROVE';
     public const REJECT  = 'DEMANDE_REJECT';
     public const DELETE  = 'DEMANDE_DELETE';
@@ -24,7 +25,7 @@ class DemandeVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         if (!in_array($attribute, [
-            self::VIEW, self::CREATE, self::APPROVE,
+            self::VIEW, self::CREATE, self::EDIT, self::APPROVE,
             self::REJECT, self::DELETE, self::CANCEL,
         ], true)) {
             return false;
@@ -54,8 +55,9 @@ class DemandeVoter extends Voter
         $demande = $subject instanceof DemandeMateriel ? $subject : null;
 
         return match ($attribute) {
-            self::CREATE  => true, // tout utilisateur authentifié et actif
+            self::CREATE  => true,
             self::VIEW    => $this->canView($demande, $user),
+            self::EDIT    => $this->canEdit($demande, $user),
             self::APPROVE, self::REJECT => $this->isManager($user),
             self::DELETE  => $this->canDelete($demande, $user),
             self::CANCEL  => $this->canCancel($demande, $user),
@@ -70,6 +72,15 @@ class DemandeVoter extends Voter
         }
 
         return $demande?->getRequester()?->getId() === $user->getId();
+    }
+
+    private function canEdit(?DemandeMateriel $demande, User $user): bool
+    {
+        if ($demande === null || !$demande->isPending()) {
+            return false;
+        }
+
+        return $demande->getRequester()?->getId() === $user->getId();
     }
 
     private function canDelete(?DemandeMateriel $demande, User $user): bool

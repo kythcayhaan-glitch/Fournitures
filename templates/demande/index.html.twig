@@ -85,11 +85,26 @@
                                 {{ include('components/badge_statut.html.twig', {statut: demande.statut}) }}
                             </td>
                             <td class="text-center">{{ demande.lignes|length }}</td>
-                            <td class="text-end">
-                                <a href="{{ path('app_demande_show', {id: demande.id}) }}"
-                                   class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                            <td class="text-end" onclick="event.stopPropagation()">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ path('app_demande_show', {id: demande.id}) }}"
+                                       class="btn btn-outline-secondary" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if demande.isPending and is_granted('DEMANDE_EDIT', demande) %}
+                                    <a href="{{ path('app_demande_edit', {id: demande.id}) }}"
+                                       class="btn btn-outline-primary" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_demande_delete_user', {id: demande.id}) }}"
+                                          onsubmit="return confirm('Supprimer cette demande ?')" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_demande_user_' ~ demande.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
