@@ -14,6 +14,12 @@
 {% endblock %}
 
 {% block body %}
+{% set articles_rupture = [] %}
+{% for ligne in demande.lignes %}
+    {% if ligne.fourniture.stockQuantity == 0 %}
+        {% set articles_rupture = articles_rupture|merge([ligne.fourniture.name]) %}
+    {% endif %}
+{% endfor %}
 <div class="row g-3">
     <div class="col-lg-7">
         {# Résumé de la demande #}
@@ -112,3 +118,5 @@
     </div>
 </div>
 {% endblock %}
+
+{% block javascripts %}{% endblock %}

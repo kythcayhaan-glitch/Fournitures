@@ -20,6 +20,7 @@ class LigneDemandeType extends AbstractType
             ->add('fourniture', EntityType::class, [
                 'class'        => Fourniture::class,
                 'choice_label' => fn(Fourniture $f) => sprintf('[%s] %s (stock: %d %s)', $f->getReference(), $f->getName(), $f->getStockQuantity(), $f->getUnit()),
+                'choice_attr'  => fn(Fourniture $f) => ['data-stock' => $f->getStockQuantity(), 'data-name' => $f->getName()],
                 'placeholder'  => '-- Sélectionner une fourniture --',
                 'query_builder' => function (\App\Repository\FournitureRepository $repo) {
                     return $repo->createQueryBuilder('f')
