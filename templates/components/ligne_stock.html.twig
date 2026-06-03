@@ -1,10 +1,10 @@
 {% set is_low = fourniture.stockQuantity <= fourniture.stockMinimum %}
-<tr class="{{ is_low ? 'stock-bas' : '' }}">
+<tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}'">
     <td>
         <strong>{{ fourniture.name }}</strong>
         <br><small class="text-muted">{{ fourniture.reference }}</small>
     </td>
-    <td>{{ fourniture.category.name }}</td>
+    <td>{{ fourniture.category ? fourniture.category.name : '—' }}</td>
     <td class="text-center">
         <span class="badge {{ is_low ? 'bg-danger' : 'bg-success' }} fs-6">
             {{ fourniture.stockQuantity }}
@@ -20,7 +20,7 @@
         {% endif %}
     </td>
     {% if show_actions ?? false %}
-    <td>
+    <td onclick="event.stopPropagation()">
         <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-pencil"></i> Ajuster
