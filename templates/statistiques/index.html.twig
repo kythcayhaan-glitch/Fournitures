@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques{% endblock %}
+{% block page_title %}<i class="bi bi-bar-chart-line"></i> Statistiques{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Statistiques</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block stylesheets %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+{# ── Cartes résumé ── #}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-1 fw-bold text-primary">{{ totalDemandes }}</div>
+                <div class="text-muted">Demandes totales</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-1 fw-bold text-success">{{ parStatut['delivered'] ?? 0 }}</div>
+                <div class="text-muted">Livrées</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-1 fw-bold text-warning">{{ parStatut['pending'] ?? 0 }}</div>
+                <div class="text-muted">En attente</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-1 fw-bold text-danger">{{ stocksBas|length }}</div>
+                <div class="text-muted">Articles stock bas / {{ totalArticles }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {# ── Graphique demandes par mois ── #}
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-graph-up"></i> Demandes par mois (6 derniers mois)</div>
+            <div class="card-body">
+                <canvas id="chartMois" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ── Répartition par statut ── #}
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-pie-chart"></i> Répartition par statut</div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="chartStatut" style="max-height:220px"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {# ── Demandes par service ── #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold"><i class="bi bi-building"></i> Demandes par service</div>
+            <div class="card-body">
+                {% if parService is empty %}
+                    <p class="text-muted text-center">Aucune donnée — renseignez le service dans les profils utilisateurs.</p>
+                {% else %}
+                    {% for s in parService %}
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div style="width:160px" class="text-end small fw-semibold text-truncate">{{ s.service }}</div>
+                        <div class="flex-grow-1">
+                            <div class="progress" style="height:20px">
+                                <div class="progress-bar bg-info" style="width:{{ maxService > 0 ? (s.cnt / maxService * 100)|round : 0 }}%">
+                                    {{ s.cnt }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    {# ── Top articles demandés ── #}
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-trophy"></i> Top 10 articles les plus demandés</div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Article</th>
+                            <th class="text-center">Qté totale demandée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in topArticles %}
+                        <tr>
+                            <td class="text-muted">{{ loop.index }}</td>
+                            <td>{{ item.name }}</td>
+                            <td class="text-center fw-bold">{{ item.total }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">Aucune donnée</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# ── Top demandeurs ── #}
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-person-lines-fill"></i> Top demandeurs</div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Utilisateur</th>
+                            <th class="text-center">Demandes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in topDemandeurs %}
+                        <tr>
+                            <td class="text-muted">{{ loop.index }}</td>
+                            <td>
+                                {{ u.firstName }} {{ u.lastName }}
+                                <div class="progress mt-1" style="height:4px">
+                                    <div class="progress-bar bg-primary" style="width:{{ maxDemandeurs > 0 ? (u.cnt / maxDemandeurs * 100)|round : 0 }}%"></div>
+                                </div>
+                            </td>
+                            <td class="text-center fw-bold">{{ u.cnt }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">Aucune donnée</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+const moisLabels = {{ moisLabels|json_encode|raw }};
+const moisData   = {{ moisData|json_encode|raw }};
+
+new Chart(document.getElementById('chartMois'), {
+    type: 'bar',
+    data: {
+        labels: moisLabels,
+        datasets: [{
+            label: 'Demandes',
+            data: moisData,
+            backgroundColor: 'rgba(13,110,253,0.7)',
+            borderRadius: 4,
+        }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+
+new Chart(document.getElementById('chartStatut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['En attente', 'Livrées', 'Rejetées'],
+        datasets: [{
+            data: [
+                {{ parStatut['pending'] ?? 0 }},
+                {{ parStatut['delivered'] ?? 0 }},
+                {{ parStatut['rejected'] ?? 0 }}
+            ],
+            backgroundColor: ['#ffc107','#198754','#dc3545'],
+        }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

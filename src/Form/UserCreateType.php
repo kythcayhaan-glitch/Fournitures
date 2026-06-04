@@ -30,6 +30,11 @@ class UserCreateType extends AbstractType
                 'attr'        => ['class' => 'form-control'],
                 'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
             ])
+            ->add('service', TextType::class, [
+                'label'    => 'Service',
+                'required' => false,
+                'attr'     => ['class' => 'form-control', 'placeholder' => 'Ex: Urbanisme, RH...'],
+            ])
             ->add('plainPassword', RepeatedType::class, [
                 'type'            => PasswordType::class,
                 'mapped'          => false,
@@ -56,7 +61,7 @@ class UserCreateType extends AbstractType
                     'Admin'       => 'ROLE_ADMIN',
                 ],
                 'attr'    => ['class' => 'form-select'],
-                'data'    => 'ROLE_USER',
+                'data'    => $options['initial_role'],
             ])
         ;
 
@@ -75,6 +80,7 @@ class UserCreateType extends AbstractType
             'data_class'       => User::class,
             'require_password' => true,
             'show_active'      => false,
+            'initial_role'     => 'ROLE_USER',
         ]);
     }
 }

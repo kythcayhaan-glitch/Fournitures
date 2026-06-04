@@ -244,8 +244,8 @@ class AdminController extends AbstractController
         $form = $this->createForm(UserCreateType::class, $user, [
             'require_password' => false,
             'show_active'      => true,
+            'initial_role'     => $currentRole,
         ]);
-        $form->get('role')->setData($currentRole);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

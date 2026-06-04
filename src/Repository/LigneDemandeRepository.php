@@ -17,4 +17,16 @@ class LigneDemandeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, LigneDemande::class);
     }
+
+    public function topArticlesDemandes(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('l')
+            ->select('f.name, SUM(l.quantiteDemandee) as total')
+            ->join('l.fourniture', 'f')
+            ->groupBy('f.id')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

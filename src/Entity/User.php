@@ -37,6 +37,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Length(max: 100)]
     private string $lastName = '';
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $service = null;
+
     /** @var list<string> */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -131,6 +134,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->lastName;
     }
+
+    public function getService(): ?string { return $this->service; }
+    public function setService(?string $service): static { $this->service = $service; return $this; }
 
     public function setLastName(string $lastName): static
     {

@@ -160,4 +160,60 @@ class DemandeMaterielRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function countByStatut(): array
+    {
+        $results = $this->createQueryBuilder('d')
+            ->select('d.statut, COUNT(d.id) as cnt')
+            ->groupBy('d.statut')
+            ->getQuery()
+            ->getResult();
+
+        $counts = [];
+        foreach ($results as $r) {
+            $counts[$r['statut']] = (int) $r['cnt'];
+        }
+        return $counts;
+    }
+
+    public function countParMois(int $nbMois = 6): array
+    {
+        $depuis = new \DateTimeImmutable("first day of -$nbMois months");
+
+        $results = $this->getEntityManager()->createQuery(
+            "SELECT SUBSTRING(d.requestedAt, 1, 7) as mois, COUNT(d.id) as cnt
+             FROM App\Entity\DemandeMateriel d
+             WHERE d.requestedAt >= :depuis
+             GROUP BY mois ORDER BY mois ASC"
+        )->setParameter('depuis', $depuis)->getResult();
+
+        $data = [];
+        foreach ($results as $r) {
+            $data[$r['mois']] = (int) $r['cnt'];
+        }
+        return $data;
+    }
+
+    public function countByService(): array
+    {
+        return $this->createQueryBuilder('d')
+            ->select('COALESCE(u.service, \'Non défini\') as service, COUNT(d.id) as cnt')
+            ->join('d.requester', 'u')
+            ->groupBy('service')
+            ->orderBy('cnt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function topDemandeurs(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('d')
+            ->select('u.firstName, u.lastName, COUNT(d.id) as cnt')
+            ->join('d.requester', 'u')
+            ->groupBy('u.id')
+            ->orderBy('cnt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }
