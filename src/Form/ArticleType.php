@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Category;
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
-class FournitureType extends AbstractType
+class ArticleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -37,6 +38,12 @@ class FournitureType extends AbstractType
                 'label'    => 'Description',
                 'required' => false,
                 'attr'     => ['class' => 'form-control', 'rows' => 3],
+            ])
+            ->add('unitPrice', NumberType::class, [
+                'label'       => 'Prix unitaire (€)',
+                'scale'       => 2,
+                'attr'        => ['class' => 'form-control', 'min' => 0.01, 'step' => 0.01],
+                'constraints' => [new NotBlank(), new Positive()],
             ])
             ->add('unit', ChoiceType::class, [
                 'label'   => 'Unité',
@@ -57,6 +64,19 @@ class FournitureType extends AbstractType
                 'attr'  => ['class' => 'form-control', 'min' => 0],
                 'constraints' => [new PositiveOrZero()],
             ])
+        ;
+
+        if ($options['is_creation']) {
+            $builder->add('stockQuantity', IntegerType::class, [
+                'label'       => 'Stock réel',
+                'mapped'      => false,
+                'data'        => 0,
+                'attr'        => ['class' => 'form-control', 'min' => 0],
+                'constraints' => [new PositiveOrZero()],
+            ]);
+        }
+
+        $builder
             ->add('category', EntityType::class, [
                 'class'        => Category::class,
                 'choice_label' => 'name',
@@ -65,18 +85,14 @@ class FournitureType extends AbstractType
                 'attr'         => ['class' => 'form-select'],
                 'constraints'  => [new NotBlank()],
             ])
-            ->add('isActive', CheckboxType::class, [
-                'label'    => 'Fourniture active',
-                'required' => false,
-                'attr'     => ['class' => 'form-check-input'],
-            ])
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Fourniture::class,
+            'data_class'  => Article::class,
+            'is_creation' => false,
         ]);
     }
 }

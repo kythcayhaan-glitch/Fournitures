@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Voter pour les permissions sur les fournitures.
+ * Voter pour les permissions sur les articles.
  */
-class FournitureVoter extends Voter
+class ArticleVoter extends Voter
 {
-    public const VIEW   = 'FOURNITURE_VIEW';
-    public const CREATE = 'FOURNITURE_CREATE';
-    public const EDIT   = 'FOURNITURE_EDIT';
-    public const DELETE = 'FOURNITURE_DELETE';
+    public const VIEW   = 'ARTICLE_VIEW';
+    public const CREATE = 'ARTICLE_CREATE';
+    public const EDIT   = 'ARTICLE_EDIT';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (!in_array($attribute, [self::VIEW, self::CREATE, self::EDIT, self::DELETE], true)) {
+        if (!in_array($attribute, [self::VIEW, self::CREATE, self::EDIT], true)) {
             return false;
         }
 
@@ -30,7 +29,7 @@ class FournitureVoter extends Voter
             return true;
         }
 
-        return $subject instanceof Fourniture;
+        return $subject instanceof Article;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -47,7 +46,7 @@ class FournitureVoter extends Voter
 
         return match ($attribute) {
             self::VIEW   => true, // tout utilisateur authentifié et actif
-            self::CREATE, self::EDIT, self::DELETE => $this->isAdminOrManager($user),
+            self::CREATE, self::EDIT => $this->isAdminOrManager($user),
             default      => false,
         };
     }

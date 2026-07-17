@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\DemandeMateriel;
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Form\AjustementStockType;
 use App\Form\ProcessDemandeType;
 use App\Repository\CategoryRepository;
 use App\Repository\DemandeMaterielRepository;
-use App\Repository\FournitureRepository;
+use App\Repository\ArticleRepository;
 use App\Security\Voter\DemandeVoter;
 use App\Service\StockService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,7 +28,7 @@ class ManagerController extends AbstractController
 {
     public function __construct(
         private readonly DemandeMaterielRepository $demandeRepository,
-        private readonly FournitureRepository $fournitureRepository,
+        private readonly ArticleRepository $articleRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly EntityManagerInterface $em,
         private readonly PaginatorInterface $paginator,
@@ -89,7 +89,16 @@ class ManagerController extends AbstractController
             return $this->redirectToRoute('app_manager_index');
         }
 
-        $form = $this->createForm(ProcessDemandeType::class);
+        foreach ($demande->getLignes() as $ligne) {
+            if ($ligne->getQuantiteServie() === 0) {
+                $ligne->setQuantiteServie($ligne->getQuantiteDemandee());
+            }
+        }
+
+        $form = $this->createForm(ProcessDemandeType::class, [
+            'action' => 'approve',
+            'lignes' => $demande->getLignes(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -107,6 +116,12 @@ class ManagerController extends AbstractController
 
             if ($commentaire) {
                 $demande->setCommentaire($commentaire);
+            }
+
+            if ($action === 'reject') {
+                foreach ($demande->getLignes() as $ligne) {
+                    $ligne->setQuantiteServie(0);
+                }
             }
 
             if ($this->demandeMaterielStateMachine->can($demande, $action)) {
@@ -129,7 +144,7 @@ class ManagerController extends AbstractController
     }
 
     #[Route('/stock/{id}/ajuster', name: 'app_manager_ajuster', methods: ['GET', 'POST'])]
-    public function ajusterStock(Request $request, Fourniture $fourniture): Response
+    public function ajusterStock(Request $request, Article $article): Response
     {
         $form = $this->createForm(AjustementStockType::class);
         $form->handleRequest($request);
@@ -140,7 +155,7 @@ class ManagerController extends AbstractController
             $data = $form->getData();
 
             $this->stockService->ajustementStock(
-                $fourniture,
+                $article,
                 (int) $data['nouvelleQuantite'],
                 (string) ($data['motif'] ?? ''),
                 $user
@@ -148,9 +163,9 @@ class ManagerController extends AbstractController
 
             $this->addFlash('success', sprintf(
                 'Stock de "%s" ajusté à %d %s.',
-                $fourniture->getName(),
+                $article->getName(),
                 $data['nouvelleQuantite'],
-                $fourniture->getUnit()
+                $article->getUnit()
             ));
 
             return $this->redirectToRoute('app_manager_stock');
@@ -158,7 +173,7 @@ class ManagerController extends AbstractController
 
         return $this->render('admin/inventaire_ajuster.html.twig', [
             'form'       => $form,
-            'fourniture' => $fourniture,
+            'article' => $article,
         ]);
     }
 
@@ -171,10 +186,9 @@ class ManagerController extends AbstractController
         $search = $request->query->get('search');
         $categoryId = ($c = $request->query->get('category')) && ctype_digit((string) $c) ? (int) $c : null;
 
-        $qb = $this->fournitureRepository->createAdminQueryBuilder(
+        $qb = $this->articleRepository->createAdminQueryBuilder(
             $search ?: null,
-            $categoryId,
-            true
+            $categoryId
         );
 
         $pagination = $this->paginator->paginate(
@@ -183,7 +197,7 @@ class ManagerController extends AbstractController
             25
         );
 
-        $stocksBas  = $this->fournitureRepository->findStockBas();
+        $stocksBas  = $this->articleRepository->findStockBas();
         $categories = $this->categoryRepository->findAllOrderedByName();
 
         return $this->render('manager/stock.html.twig', [

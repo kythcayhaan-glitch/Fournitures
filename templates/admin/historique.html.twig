@@ -70,8 +70,8 @@
                     <tr>
                         <td class="text-muted small text-nowrap">{{ mouvement.createdAt|date('d/m/Y H:i') }}</td>
                         <td>
-                            <strong>{{ mouvement.fourniture.name }}</strong>
-                            <br><small class="text-muted">{{ mouvement.fourniture.reference }}</small>
+                            <strong>{{ mouvement.article.name }}</strong>
+                            <br><small class="text-muted">{{ mouvement.article.reference }}</small>
                         </td>
                         <td>
                             <span class="badge {{ mouvement.type.badgeClass() }}">
@@ -89,7 +89,7 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="badge {{ mouvement.quantiteApres <= mouvement.fourniture.stockMinimum ? 'bg-danger' : 'bg-success' }}">
+                            <span class="badge {{ mouvement.quantiteApres <= mouvement.article.stockMinimum ? 'bg-danger' : 'bg-success' }}">
                                 {{ mouvement.quantiteApres }}
                             </span>
                         </td>

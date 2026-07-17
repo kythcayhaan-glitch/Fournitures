@@ -6,10 +6,10 @@ namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ProcessDemandeType extends AbstractType
 {
@@ -26,6 +26,14 @@ class ProcessDemandeType extends AbstractType
                 'multiple' => false,
                 'data'     => 'approve',
                 'attr'     => ['class' => 'form-check'],
+            ])
+            ->add('lignes', CollectionType::class, [
+                'entry_type'    => LigneServieType::class,
+                'allow_add'     => false,
+                'allow_delete'  => false,
+                'by_reference'  => true,
+                'label'         => false,
+                'entry_options' => ['label' => false],
             ])
             ->add('commentaire', TextareaType::class, [
                 'label'    => 'Commentaire',

@@ -1,17 +1,17 @@
-{% set is_low = fourniture.stockQuantity <= fourniture.stockMinimum %}
-<tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}'">
+{% set is_low = article.stockQuantity <= article.stockMinimum %}
+<tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_inventaire_ajuster', {id: article.id}) }}'">
     <td>
-        <strong>{{ fourniture.name }}</strong>
-        <br><small class="text-muted">{{ fourniture.reference }}</small>
+        <strong>{{ article.name }}</strong>
+        <br><small class="text-muted">{{ article.reference }}</small>
     </td>
-    <td>{{ fourniture.category ? fourniture.category.name : '—' }}</td>
+    <td>{{ article.category ? article.category.name : '—' }}</td>
     <td class="text-center">
         <span class="badge {{ is_low ? 'bg-danger' : 'bg-success' }} fs-6">
-            {{ fourniture.stockQuantity }}
+            {{ article.stockQuantity }}
         </span>
-        <small class="text-muted">/ {{ fourniture.unit }}</small>
+        <small class="text-muted">/ {{ article.unit }}</small>
     </td>
-    <td class="text-center text-muted">{{ fourniture.stockMinimum }}</td>
+    <td class="text-center text-muted">{{ article.stockMinimum }}</td>
     <td class="text-center">
         {% if is_low %}
             <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Stock bas</span>
@@ -21,7 +21,7 @@
     </td>
     {% if show_actions ?? false %}
     <td onclick="event.stopPropagation()">
-        <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
+        <a href="{{ path('app_admin_inventaire_ajuster', {id: article.id}) }}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-pencil"></i> Ajuster
         </a>

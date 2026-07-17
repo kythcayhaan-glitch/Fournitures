@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Repository\DemandeMaterielRepository;
-use App\Repository\FournitureRepository;
+use App\Repository\ArticleRepository;
 use App\Repository\LigneDemandeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ class StatistiquesController extends AbstractController
     public function __construct(
         private readonly DemandeMaterielRepository $demandeRepository,
         private readonly LigneDemandeRepository $ligneRepository,
-        private readonly FournitureRepository $fournitureRepository,
+        private readonly ArticleRepository $articleRepository,
     ) {}
 
     #[Route('/statistiques', name: 'app_statistiques', methods: ['GET'])]
@@ -29,8 +29,8 @@ class StatistiquesController extends AbstractController
         $parMois       = $this->demandeRepository->countParMois(6);
         $topDemandeurs = $this->demandeRepository->topDemandeurs(5);
         $topArticles   = $this->ligneRepository->topArticlesDemandes(10);
-        $stocksBas     = $this->fournitureRepository->findStockBas();
-        $totalArticles = $this->fournitureRepository->count([]);
+        $stocksBas     = $this->articleRepository->findStockBas();
+        $totalArticles = $this->articleRepository->count([]);
 
         $totalDemandes  = array_sum($parStatut);
         $maxDemandeurs  = $topDemandeurs ? max(array_column($topDemandeurs, 'cnt')) : 1;

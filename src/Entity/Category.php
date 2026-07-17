@@ -31,14 +31,14 @@ class Category
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    /** @var Collection<int, Fourniture> */
-    #[ORM\OneToMany(targetEntity: Fourniture::class, mappedBy: 'category')]
-    private Collection $fournitures;
+    /** @var Collection<int, Article> */
+    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'category')]
+    private Collection $articles;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->fournitures = new ArrayCollection();
+        $this->articles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -73,26 +73,26 @@ class Category
         return $this->createdAt;
     }
 
-    /** @return Collection<int, Fourniture> */
-    public function getFournitures(): Collection
+    /** @return Collection<int, Article> */
+    public function getArticles(): Collection
     {
-        return $this->fournitures;
+        return $this->articles;
     }
 
-    public function addFourniture(Fourniture $fourniture): static
+    public function addArticle(Article $article): static
     {
-        if (!$this->fournitures->contains($fourniture)) {
-            $this->fournitures->add($fourniture);
-            $fourniture->setCategory($this);
+        if (!$this->articles->contains($article)) {
+            $this->articles->add($article);
+            $article->setCategory($this);
         }
         return $this;
     }
 
-    public function removeFourniture(Fourniture $fourniture): static
+    public function removeArticle(Article $article): static
     {
-        if ($this->fournitures->removeElement($fourniture)) {
-            if ($fourniture->getCategory() === $this) {
-                $fourniture->setCategory(null);
+        if ($this->articles->removeElement($article)) {
+            if ($article->getCategory() === $this) {
+                $article->setCategory(null);
             }
         }
         return $this;

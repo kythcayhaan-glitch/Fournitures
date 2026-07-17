@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:stock:alertes',
-    description: 'Affiche toutes les fournitures dont le stock est sous le seuil minimum.',
+    description: 'Affiche tous les articles dont le stock est sous le seuil minimum.',
 )]
 class StockAlertesCommand extends Command
 {
@@ -28,17 +28,17 @@ class StockAlertesCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Alertes Stock Bas');
 
-        $fournitures = $this->stockService->getFournituresStockBas();
+        $articles = $this->stockService->getArticlesStockBas();
 
-        if (empty($fournitures)) {
+        if (empty($articles)) {
             $io->success('Tous les stocks sont à niveau. Aucune alerte.');
             return Command::SUCCESS;
         }
 
-        $io->warning(sprintf('%d fourniture(s) en stock bas :', count($fournitures)));
+        $io->warning(sprintf('%d article(s) en stock bas :', count($articles)));
 
         $rows = [];
-        foreach ($fournitures as $f) {
+        foreach ($articles as $f) {
             $rows[] = [
                 $f->getReference(),
                 $f->getName(),

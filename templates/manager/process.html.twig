@@ -16,10 +16,11 @@
 {% block body %}
 {% set articles_rupture = [] %}
 {% for ligne in demande.lignes %}
-    {% if ligne.fourniture.stockQuantity == 0 %}
-        {% set articles_rupture = articles_rupture|merge([ligne.fourniture.name]) %}
+    {% if ligne.article.stockQuantity == 0 %}
+        {% set articles_rupture = articles_rupture|merge([ligne.article.name]) %}
     {% endif %}
 {% endfor %}
+{{ form_start(form) }}
 <div class="row g-3">
     <div class="col-lg-7">
         {# Résumé de la demande #}
@@ -46,7 +47,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Article</th>
-                                <th class="text-center">Qté</th>
+                                <th class="text-center">Qté demandée</th>
+                                <th class="text-center">Qté à servir</th>
                                 <th class="text-center">Stock dispo</th>
                             </tr>
                         </thead>
@@ -54,16 +56,19 @@
                             {% for ligne in demande.lignes %}
                             <tr>
                                 <td>
-                                    {{ ligne.fourniture.name }}
-                                    <small class="text-muted">({{ ligne.fourniture.reference }})</small>
+                                    {{ ligne.article.name }}
+                                    <small class="text-muted">({{ ligne.article.reference }})</small>
                                 </td>
-                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.fourniture.unit }}</td>
+                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.article.unit }}</td>
+                                <td class="text-center" style="max-width: 90px;">
+                                    {{ form_widget(form.lignes[loop.index0].quantiteServie) }}
+                                </td>
                                 <td class="text-center">
-                                    {% if ligne.fourniture.stockQuantity >= ligne.quantiteDemandee %}
-                                        <span class="badge bg-success">{{ ligne.fourniture.stockQuantity }}</span>
+                                    {% if ligne.article.stockQuantity >= ligne.quantiteDemandee %}
+                                        <span class="badge bg-success">{{ ligne.article.stockQuantity }}</span>
                                     {% else %}
                                         <span class="badge bg-danger" title="Stock insuffisant">
-                                            {{ ligne.fourniture.stockQuantity }}
+                                            {{ ligne.article.stockQuantity }}
                                         </span>
                                         <i class="bi bi-exclamation-triangle text-danger" title="Stock insuffisant"></i>
                                     {% endif %}
@@ -73,6 +78,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="form-text text-muted mb-3">La quantité à servir peut être ajustée en cas de rupture partielle.</div>
             </div>
         </div>
     </div>
@@ -83,8 +89,6 @@
                 <h6 class="mb-0"><i class="bi bi-check2-circle"></i> Décision</h6>
             </div>
             <div class="card-body">
-                {{ form_start(form) }}
-
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Votre décision</label>
                     <div class="d-flex gap-3">
@@ -111,12 +115,11 @@
                         <i class="bi bi-arrow-left"></i> Retour
                     </a>
                 </div>
-
-                {{ form_end(form) }}
             </div>
         </div>
     </div>
 </div>
+{{ form_end(form) }}
 {% endblock %}
 
 {% block javascripts %}{% endblock %}

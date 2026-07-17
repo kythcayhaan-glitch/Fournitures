@@ -1,15 +1,21 @@
 changelog:
+  - date: "17/07/2026"
+    icon: "bi-arrow-repeat"
+    color: "text-primary"
+    titre: "Articles"
+    description: "Les fournitures sont renommées en articles dans toute l'application. Prix unitaire et stock réel demandés à la création. La notion active/inactive est supprimée. Lors du traitement d'une demande, la quantité servie par article peut être ajustée."
+
   - date: "03/06/2026"
     icon: "bi-rocket-takeoff"
     color: "text-success"
     titre: "Mise en ligne de l'application"
-    description: "Première version de l'application de gestion des fournitures de bureau. Catalogue de 286 articles importé depuis l'ancien système."
+    description: "Première version de l'application de gestion des articles de bureau. Catalogue de 286 articles importé depuis l'ancien système."
 
   - date: "03/06/2026"
     icon: "bi-boxes"
     color: "text-primary"
     titre: "Vue stock complète"
-    description: "Gestion des fournitures centralisée dans une seule vue : ajout, édition, ajustement de stock, suppression, filtre par catégorie."
+    description: "Gestion des articles centralisée dans une seule vue : ajout, édition, ajustement de stock, suppression, filtre par catégorie."
 
   - date: "03/06/2026"
     icon: "bi-clipboard-plus"

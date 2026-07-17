@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Category;
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Entity\User;
 use App\Form\AjustementStockType;
 use App\Form\CategoryType;
-use App\Form\FournitureType;
+use App\Form\ArticleType;
 use App\Form\UserCreateType;
 use App\Repository\CategoryRepository;
 use App\Entity\DemandeMateriel;
 use App\Repository\DemandeMaterielRepository;
-use App\Repository\FournitureRepository;
+use App\Repository\ArticleRepository;
 use App\Repository\MouvementStockRepository;
 use App\Repository\UserRepository;
-use App\Security\Voter\FournitureVoter;
+use App\Security\Voter\ArticleVoter;
 use App\Service\DemandeService;
 use App\Service\StockService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +34,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminController extends AbstractController
 {
     public function __construct(
-        private readonly FournitureRepository $fournitureRepository,
+        private readonly ArticleRepository $articleRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly UserRepository $userRepository,
         private readonly MouvementStockRepository $mouvementRepository,
@@ -46,85 +46,79 @@ class AdminController extends AbstractController
         private readonly UserPasswordHasherInterface $hasher,
     ) {}
 
-    // ─── FOURNITURES ────────────────────────────────────────────────────────
+    // ─── ARTICLES ────────────────────────────────────────────────────────
 
-    #[Route('/fournitures', name: 'app_admin_fournitures', methods: ['GET'])]
-    public function fournitures(Request $request): Response
+    #[Route('/articles', name: 'app_admin_articles', methods: ['GET'])]
+    public function articles(Request $request): Response
     {
         $search = $request->query->get('search');
         $categoryId = ($c = $request->query->get('category')) && ctype_digit((string) $c) ? (int) $c : null;
-        $isActive = $request->query->has('active') ? (bool) $request->query->get('active') : null;
 
-        $qb = $this->fournitureRepository->createAdminQueryBuilder(
+        $qb = $this->articleRepository->createAdminQueryBuilder(
             $search ?: null,
-            $categoryId,
-            $isActive
+            $categoryId
         );
 
         $pagination = $this->paginator->paginate($qb, $request->query->getInt('page', 1), 20);
         $categories = $this->categoryRepository->findAllOrderedByName();
 
-        return $this->render('admin/fournitures/index.html.twig', [
+        return $this->render('admin/articles/index.html.twig', [
             'pagination' => $pagination,
             'categories' => $categories,
             'search'     => $search,
         ]);
     }
 
-    #[Route('/fournitures/new', name: 'app_admin_fournitures_new', methods: ['GET', 'POST'])]
-    public function fournitureNew(Request $request): Response
+    #[Route('/articles/new', name: 'app_admin_articles_new', methods: ['GET', 'POST'])]
+    public function articleNew(Request $request): Response
     {
-        $this->denyAccessUnlessGranted(FournitureVoter::CREATE);
+        $this->denyAccessUnlessGranted(ArticleVoter::CREATE);
 
-        $fourniture = new Fourniture();
-        $form = $this->createForm(FournitureType::class, $fourniture);
+        $article = new Article();
+        $form = $this->createForm(ArticleType::class, $article, ['is_creation' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($fourniture);
-            $this->em->flush();
-            $this->addFlash('success', 'Fourniture créée avec succès.');
-            return $this->redirectToRoute('app_admin_fournitures');
+            $stockReel = (int) $form->get('stockQuantity')->getData();
+
+            $this->em->persist($article);
+
+            if ($stockReel > 0) {
+                /** @var \App\Entity\User $user */
+                $user = $this->getUser();
+                $this->stockService->ajouterStock($article, $stockReel, 'Stock initial', $user);
+            } else {
+                $this->em->flush();
+            }
+
+            $this->addFlash('success', 'Article créé avec succès.');
+            return $this->redirectToRoute('app_admin_articles');
         }
 
-        return $this->render('admin/fournitures/new.html.twig', [
-            'form'       => $form,
-            'fourniture' => $fourniture,
+        return $this->render('admin/articles/new.html.twig', [
+            'form'    => $form,
+            'article' => $article,
         ]);
     }
 
-    #[Route('/fournitures/{id}/edit', name: 'app_admin_fournitures_edit', methods: ['GET', 'POST'])]
-    public function fournitureEdit(Request $request, Fourniture $fourniture): Response
+    #[Route('/articles/{id}/edit', name: 'app_admin_articles_edit', methods: ['GET', 'POST'])]
+    public function articleEdit(Request $request, Article $article): Response
     {
-        $this->denyAccessUnlessGranted(FournitureVoter::EDIT, $fourniture);
+        $this->denyAccessUnlessGranted(ArticleVoter::EDIT, $article);
 
-        $form = $this->createForm(FournitureType::class, $fourniture);
+        $form = $this->createForm(ArticleType::class, $article);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
-            $this->addFlash('success', 'Fourniture mise à jour.');
-            return $this->redirectToRoute('app_admin_fournitures');
+            $this->addFlash('success', 'Article mis à jour.');
+            return $this->redirectToRoute('app_admin_articles');
         }
 
-        return $this->render('admin/fournitures/edit.html.twig', [
-            'form'       => $form,
-            'fourniture' => $fourniture,
+        return $this->render('admin/articles/edit.html.twig', [
+            'form'    => $form,
+            'article' => $article,
         ]);
-    }
-
-    #[Route('/fournitures/{id}/delete', name: 'app_admin_fournitures_delete', methods: ['POST'])]
-    public function fournitureDelete(Request $request, Fourniture $fourniture): Response
-    {
-        $this->denyAccessUnlessGranted(FournitureVoter::DELETE, $fourniture);
-
-        if ($this->isCsrfTokenValid('delete_fourniture_' . $fourniture->getId(), $request->request->get('_token'))) {
-            $fourniture->setIsActive(false); // Soft delete
-            $this->em->flush();
-            $this->addFlash('success', 'Fourniture désactivée.');
-        }
-
-        return $this->redirectToRoute('app_admin_fournitures');
     }
 
     // ─── CATÉGORIES ─────────────────────────────────────────────────────────
@@ -132,7 +126,7 @@ class AdminController extends AbstractController
     #[Route('/categories', name: 'app_admin_categories', methods: ['GET'])]
     public function categories(): Response
     {
-        $categories = $this->categoryRepository->findWithFournitureCount();
+        $categories = $this->categoryRepository->findWithArticleCount();
 
         return $this->render('admin/categories/index.html.twig', [
             'categories' => $categories,
@@ -181,12 +175,12 @@ class AdminController extends AbstractController
     public function categoryDelete(Request $request, Category $category): Response
     {
         if ($this->isCsrfTokenValid('delete_category_' . $category->getId(), $request->request->get('_token'))) {
-            if ($category->getFournitures()->isEmpty()) {
+            if ($category->getArticles()->isEmpty()) {
                 $this->em->remove($category);
                 $this->em->flush();
                 $this->addFlash('success', 'Catégorie supprimée.');
             } else {
-                $this->addFlash('error', 'Impossible de supprimer une catégorie contenant des fournitures.');
+                $this->addFlash('error', 'Impossible de supprimer une catégorie contenant des articles.');
             }
         }
 
@@ -346,7 +340,7 @@ class AdminController extends AbstractController
     public function inventaire(Request $request): Response
     {
         $search = $request->query->get('search');
-        $qb = $this->fournitureRepository->createAdminQueryBuilder($search ?: null, null, null);
+        $qb = $this->articleRepository->createAdminQueryBuilder($search ?: null);
 
         $pagination = $this->paginator->paginate($qb, $request->query->getInt('page', 1), 25);
 
@@ -357,7 +351,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/inventaire/{id}/ajuster', name: 'app_admin_inventaire_ajuster', methods: ['GET', 'POST'])]
-    public function ajusterStock(Request $request, Fourniture $fourniture): Response
+    public function ajusterStock(Request $request, Article $article): Response
     {
         $form = $this->createForm(AjustementStockType::class);
         $form->handleRequest($request);
@@ -368,7 +362,7 @@ class AdminController extends AbstractController
             $data = $form->getData();
 
             $this->stockService->ajustementStock(
-                $fourniture,
+                $article,
                 (int) $data['nouvelleQuantite'],
                 (string) $data['motif'],
                 $user
@@ -376,9 +370,9 @@ class AdminController extends AbstractController
 
             $this->addFlash('success', sprintf(
                 'Stock de "%s" ajusté à %d %s.',
-                $fourniture->getName(),
+                $article->getName(),
                 $data['nouvelleQuantite'],
-                $fourniture->getUnit()
+                $article->getUnit()
             ));
 
             return $this->redirectToRoute('app_admin_inventaire');
@@ -386,7 +380,7 @@ class AdminController extends AbstractController
 
         return $this->render('admin/inventaire_ajuster.html.twig', [
             'form'       => $form,
-            'fourniture' => $fourniture,
+            'article' => $article,
         ]);
     }
 

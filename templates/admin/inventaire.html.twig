@@ -54,8 +54,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for fourniture in pagination %}
-                        {{ include('components/ligne_stock.html.twig', {fourniture: fourniture, show_actions: true}) }}
+                    {% for article in pagination %}
+                        {{ include('components/ligne_stock.html.twig', {article: article, show_actions: true}) }}
                     {% endfor %}
                 </tbody>
             </table>

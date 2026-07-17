@@ -19,15 +19,15 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne les catégories avec le nombre de fournitures actives.
+     * Retourne les catégories avec le nombre d'articles.
      *
      * @return array<array{category: Category, count: int}>
      */
-    public function findWithFournitureCount(): array
+    public function findWithArticleCount(): array
     {
         return $this->createQueryBuilder('c')
-            ->select('c', 'COUNT(f.id) as fournitureCount')
-            ->leftJoin('c.fournitures', 'f', 'WITH', 'f.isActive = true')
+            ->select('c', 'COUNT(a.id) as articleCount')
+            ->leftJoin('c.articles', 'a')
             ->groupBy('c.id')
             ->orderBy('c.name', 'ASC')
             ->getQuery()

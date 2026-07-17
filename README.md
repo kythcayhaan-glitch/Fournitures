@@ -108,7 +108,7 @@ src/
 │   ├── DemandeType.php
 │   ├── LigneDemandeType.php
 │   ├── ProcessDemandeType.php
-│   ├── DeliverDemandeType.php
+│   ├── LigneServieType.php
 │   ├── FournitureType.php
 │   ├── CategoryType.php
 │   └── AjustementStockType.php

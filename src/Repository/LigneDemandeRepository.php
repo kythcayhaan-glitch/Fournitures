@@ -21,9 +21,9 @@ class LigneDemandeRepository extends ServiceEntityRepository
     public function topArticlesDemandes(int $limit = 10): array
     {
         return $this->createQueryBuilder('l')
-            ->select('f.name, SUM(l.quantiteDemandee) as total')
-            ->join('l.fourniture', 'f')
-            ->groupBy('f.id')
+            ->select('a.name, SUM(l.quantiteDemandee) as total')
+            ->join('l.article', 'a')
+            ->groupBy('a.id')
             ->orderBy('total', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()

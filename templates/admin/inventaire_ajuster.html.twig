@@ -8,7 +8,7 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
         <li class="breadcrumb-item"><a href="{{ path('app_admin_inventaire') }}">Inventaire</a></li>
-        <li class="breadcrumb-item active">Ajuster {{ fourniture.reference }}</li>
+        <li class="breadcrumb-item active">Ajuster {{ article.reference }}</li>
     </ol>
 </nav>
 {% endblock %}
@@ -24,18 +24,18 @@
                 <div class="alert alert-info mb-4">
                     <div class="d-flex gap-3 align-items-center">
                         <div>
-                            <strong>{{ fourniture.name }}</strong>
-                            <span class="text-muted">({{ fourniture.reference }})</span>
+                            <strong>{{ article.name }}</strong>
+                            <span class="text-muted">({{ article.reference }})</span>
                         </div>
                         <div class="ms-auto">
                             <div class="text-muted small">Stock actuel</div>
-                            <span class="badge bg-{{ fourniture.isStockBas ? 'danger' : 'success' }} fs-5">
-                                {{ fourniture.stockQuantity }} {{ fourniture.unit }}
+                            <span class="badge bg-{{ article.isStockBas ? 'danger' : 'success' }} fs-5">
+                                {{ article.stockQuantity }} {{ article.unit }}
                             </span>
                         </div>
                         <div>
                             <div class="text-muted small">Seuil min.</div>
-                            <strong>{{ fourniture.stockMinimum }}</strong>
+                            <strong>{{ article.stockMinimum }}</strong>
                         </div>
                     </div>
                 </div>

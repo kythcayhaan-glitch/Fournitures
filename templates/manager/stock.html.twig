@@ -27,8 +27,8 @@
         <a href="{{ path('app_admin_historique') }}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-clock-history"></i> Historique
         </a>
-        <a href="{{ path('app_admin_fournitures_new') }}" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Nouvelle fourniture
+        <a href="{{ path('app_admin_articles_new') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> Nouvel article
         </a>
     </div>
 </div>
@@ -69,18 +69,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for fourniture in pagination %}
-                    {% set is_low = fourniture.stockQuantity <= fourniture.stockMinimum %}
-                    <tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}'">
-                        <td><strong>{{ fourniture.name }}</strong> <small class="text-muted">{{ fourniture.reference }}</small></td>
-                        <td>{{ fourniture.category ? fourniture.category.name : '—' }}</td>
+                    {% for article in pagination %}
+                    {% set is_low = article.stockQuantity <= article.stockMinimum %}
+                    <tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_articles_edit', {id: article.id}) }}'">
+                        <td><strong>{{ article.name }}</strong> <small class="text-muted">{{ article.reference }}</small></td>
+                        <td>{{ article.category ? article.category.name : '—' }}</td>
                         <td class="text-center">
                             <span class="badge {{ is_low ? 'bg-danger' : 'bg-success' }}">
-                                {{ fourniture.stockQuantity }}
+                                {{ article.stockQuantity }}
                             </span>
-                            <small class="text-muted">{{ fourniture.unit }}</small>
+                            <small class="text-muted">{{ article.unit }}</small>
                         </td>
-                        <td class="text-center text-muted">{{ fourniture.stockMinimum }}</td>
+                        <td class="text-center text-muted">{{ article.stockMinimum }}</td>
                         <td class="text-center">
                             {% if is_low %}
                                 <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Stock bas</span>
@@ -90,23 +90,14 @@
                         </td>
                         <td class="text-center" onclick="event.stopPropagation()">
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}"
+                                <a href="{{ path('app_admin_articles_edit', {id: article.id}) }}"
                                    class="btn btn-outline-primary" title="Modifier">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
+                                <a href="{{ path('app_admin_inventaire_ajuster', {id: article.id}) }}"
                                    class="btn btn-outline-secondary" title="Ajuster stock">
                                     <i class="bi bi-clipboard-data"></i>
                                 </a>
-                                <form method="post"
-                                      action="{{ path('app_admin_fournitures_delete', {id: fourniture.id}) }}"
-                                      onsubmit="return confirm('Désactiver {{ fourniture.name }} ?')"
-                                      class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_fourniture_' ~ fourniture.id) }}">
-                                    <button type="submit" class="btn btn-outline-danger" title="Désactiver">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
                             </div>
                         </td>
                     </tr>

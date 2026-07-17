@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Entity\MouvementStock;
 use App\Enum\TypeMouvement;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -22,15 +22,15 @@ class MouvementStockRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne l'historique des mouvements d'une fourniture.
+     * Retourne l'historique des mouvements d'un article.
      *
      * @return MouvementStock[]
      */
-    public function findByFourniture(Fourniture $fourniture, int $limit = 20): array
+    public function findByArticle(Article $article, int $limit = 20): array
     {
         return $this->createQueryBuilder('m')
-            ->andWhere('m.fourniture = :f')
-            ->setParameter('f', $fourniture)
+            ->andWhere('m.article = :a')
+            ->setParameter('a', $article)
             ->orderBy('m.createdAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
@@ -38,7 +38,7 @@ class MouvementStockRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne les mouvements récents toutes fournitures confondues.
+     * Retourne les mouvements récents tous articles confondus.
      *
      * @return MouvementStock[]
      */
@@ -48,7 +48,7 @@ class MouvementStockRepository extends ServiceEntityRepository
         $fin   = new \DateTimeImmutable('tomorrow');
 
         return $this->createQueryBuilder('m')
-            ->leftJoin('m.fourniture', 'f')->addSelect('f')
+            ->leftJoin('m.article', 'a')->addSelect('a')
             ->leftJoin('m.operateur', 'u')->addSelect('u')
             ->andWhere('m.createdAt >= :debut')
             ->andWhere('m.createdAt < :fin')
@@ -62,8 +62,8 @@ class MouvementStockRepository extends ServiceEntityRepository
     public function findRecent(int $limit = 50): array
     {
         return $this->createQueryBuilder('m')
-            ->leftJoin('m.fourniture', 'f')
-            ->addSelect('f')
+            ->leftJoin('m.article', 'a')
+            ->addSelect('a')
             ->leftJoin('m.operateur', 'u')
             ->addSelect('u')
             ->orderBy('m.createdAt', 'DESC')
@@ -81,8 +81,8 @@ class MouvementStockRepository extends ServiceEntityRepository
         ?\DateTimeImmutable $to = null
     ): QueryBuilder {
         $qb = $this->createQueryBuilder('m')
-            ->leftJoin('m.fourniture', 'f')
-            ->addSelect('f')
+            ->leftJoin('m.article', 'a')
+            ->addSelect('a')
             ->leftJoin('m.operateur', 'u')
             ->addSelect('u')
             ->orderBy('m.createdAt', 'DESC');

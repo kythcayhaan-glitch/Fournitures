@@ -6,7 +6,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Category;
 use App\Entity\DemandeMateriel;
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Entity\LigneDemande;
 use App\Entity\MouvementStock;
 use App\Entity\User;
@@ -58,8 +58,8 @@ class AppFixtures extends Fixture
         }
         $manager->flush();
 
-        // ── Fournitures ─────────────────────────────────────────────
-        $fournituresData = [
+        // ── Articles ─────────────────────────────────────────────
+        $articlesData = [
             // Papeterie
             ['Ramette papier A4 80g', 'PAP-A4-80G', 'Papier blanc 80g/m², 500 feuilles', 4.99, 'ramette', 50, 10, 'Papeterie'],
             ['Stylo bille bleu BIC', 'STY-BIC-BL', 'Stylo bille pointe moyenne', 0.80, 'unité', 200, 30, 'Papeterie'],
@@ -89,9 +89,9 @@ class AppFixtures extends Fixture
             ['Lingettes désinfectantes', 'LNG-DES-80', 'Boîte 80 lingettes multi-surfaces', 4.99, 'boîte', 3, 5, 'Hygiène'],
         ];
 
-        $fournitures = [];
-        foreach ($fournituresData as [$name, $ref, $desc, $price, $unit, $stock, $min, $catName]) {
-            $f = new Fourniture();
+        $articles = [];
+        foreach ($articlesData as [$name, $ref, $desc, $price, $unit, $stock, $min, $catName]) {
+            $f = new Article();
             $f->setName($name)
               ->setReference($ref)
               ->setDescription($desc)
@@ -101,7 +101,7 @@ class AppFixtures extends Fixture
               ->setStockMinimum($min)
               ->setCategory($categories[$catName]);
             $manager->persist($f);
-            $fournitures[$ref] = $f;
+            $articles[$ref] = $f;
 
             // Mouvement initial (entrée stock)
             $mouv = new MouvementStock();
@@ -110,7 +110,7 @@ class AppFixtures extends Fixture
                  ->setQuantiteAvant(0)
                  ->setQuantiteApres($stock)
                  ->setMotif('Stock initial')
-                 ->setFourniture($f)
+                 ->setArticle($f)
                  ->setOperateur($admin);
             $manager->persist($mouv);
         }
@@ -120,7 +120,7 @@ class AppFixtures extends Fixture
         $demandesData = [
             [
                 'user' => $users[0],
-                'motif' => 'Renouvellement fournitures bureau pôle RH — manque de papier et stylos.',
+                'motif' => 'Renouvellement articles bureau pôle RH — manque de papier et stylos.',
                 'statut' => 'delivered',
                 'lignes' => [
                     ['PAP-A4-80G', 10, 10],
@@ -212,7 +212,7 @@ class AppFixtures extends Fixture
             ],
             [
                 'user' => $users[3],
-                'motif' => 'Fournitures bureautiques pour accueil des stagiaires.',
+                'motif' => 'Articles bureautiques pour accueil des stagiaires.',
                 'statut' => 'delivered',
                 'lignes' => [
                     ['STY-BIC-BL', 15, 15],
@@ -259,7 +259,7 @@ class AppFixtures extends Fixture
 
             foreach ($data['lignes'] as [$fourRef, $qtyDemandee, $qtyServie]) {
                 $ligne = new LigneDemande();
-                $ligne->setFourniture($fournitures[$fourRef]);
+                $ligne->setArticle($articles[$fourRef]);
                 $ligne->setQuantiteDemandee($qtyDemandee);
                 $ligne->setQuantiteServie($qtyServie);
                 $demande->addLigne($ligne);

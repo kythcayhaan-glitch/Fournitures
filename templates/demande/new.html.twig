@@ -24,7 +24,7 @@
                 {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
 
                 <div class="row fw-semibold small text-muted mb-1 px-1">
-                    <div class="col">Fourniture</div>
+                    <div class="col">Article</div>
                     <div class="col-auto" style="width:110px">Quantité</div>
                     <div class="col-auto" style="width:42px"></div>
                 </div>
@@ -33,8 +33,8 @@
                     {% for ligne in form.lignes %}
                     <div class="ligne-demande d-flex align-items-center gap-2 mb-2">
                         <div class="flex-grow-1">
-                            {{ form_widget(ligne.fourniture) }}
-                            {{ form_errors(ligne.fourniture) }}
+                            {{ form_widget(ligne.article) }}
+                            {{ form_errors(ligne.article) }}
                         </div>
                         <div style="width:110px">
                             {{ form_widget(ligne.quantiteDemandee) }}
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const select = tmp.querySelector('select');
         const input  = tmp.querySelector('input[type="number"], input[type="text"]');
 
-        if (select) select.className = 'form-select select-fourniture';
+        if (select) select.className = 'form-select select-article';
         if (input)  { input.className = 'form-control'; input.min = 1; }
 
         const row = document.createElement('div');
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.getElementById('btn-soumettre').addEventListener('click', function () {
     const ruptures = [];
-    document.querySelectorAll('.select-fourniture').forEach(function (sel) {
+    document.querySelectorAll('.select-article').forEach(function (sel) {
         const opt = sel.options[sel.selectedIndex];
         if (opt && opt.dataset.stock !== undefined && parseInt(opt.dataset.stock) === 0) {
             ruptures.push(opt.dataset.name || opt.text);

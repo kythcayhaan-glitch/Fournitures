@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\DemandeMateriel;
-use App\Entity\Fourniture;
+use App\Entity\Article;
 use App\Entity\LigneDemande;
 use App\Entity\MouvementStock;
 use App\Entity\User;
 use App\Enum\TypeMouvement;
-use App\Repository\FournitureRepository;
+use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -18,7 +18,7 @@ class StockService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly FournitureRepository $fournitureRepository,
+        private readonly ArticleRepository $articleRepository,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -29,8 +29,8 @@ class StockService
     public function deduireStock(LigneDemande $ligne, User $operateur, DemandeMateriel $demande): void
     {
         $this->em->wrapInTransaction(function () use ($ligne, $operateur, $demande): void {
-            $fourniture = $ligne->getFourniture();
-            if ($fourniture === null) {
+            $article = $ligne->getArticle();
+            if ($article === null) {
                 return;
             }
 
@@ -38,10 +38,10 @@ class StockService
                 ? $ligne->getQuantiteServie()
                 : $ligne->getQuantiteDemandee();
 
-            $avant = $fourniture->getStockQuantity();
+            $avant = $article->getStockQuantity();
             $apres = max(0, $avant - $qty);
 
-            $fourniture->setStockQuantity($apres);
+            $article->setStockQuantity($apres);
 
             $mouvement = new MouvementStock();
             $mouvement->setType(TypeMouvement::SORTIE);
@@ -51,16 +51,16 @@ class StockService
             $mouvement->setMotif(sprintf(
                 'Livraison demande %s — %s',
                 $demande->getReference(),
-                $fourniture->getName()
+                $article->getName()
             ));
-            $mouvement->setFourniture($fourniture);
+            $mouvement->setArticle($article);
             $mouvement->setOperateur($operateur);
             $mouvement->setDemande($demande);
 
             $this->em->persist($mouvement);
 
             $this->logger->info('Stock déduit', [
-                'fourniture' => $fourniture->getReference(),
+                'article' => $article->getReference(),
                 'quantite'   => $qty,
                 'avant'      => $avant,
                 'apres'      => $apres,
@@ -72,13 +72,13 @@ class StockService
     /**
      * Ajoute du stock (entrée de marchandise).
      */
-    public function ajouterStock(Fourniture $fourniture, int $qty, string $motif, User $operateur): void
+    public function ajouterStock(Article $article, int $qty, string $motif, User $operateur): void
     {
-        $this->em->wrapInTransaction(function () use ($fourniture, $qty, $motif, $operateur): void {
-            $avant = $fourniture->getStockQuantity();
+        $this->em->wrapInTransaction(function () use ($article, $qty, $motif, $operateur): void {
+            $avant = $article->getStockQuantity();
             $apres = $avant + $qty;
 
-            $fourniture->setStockQuantity($apres);
+            $article->setStockQuantity($apres);
 
             $mouvement = new MouvementStock();
             $mouvement->setType(TypeMouvement::ENTREE);
@@ -86,7 +86,7 @@ class StockService
             $mouvement->setQuantiteAvant($avant);
             $mouvement->setQuantiteApres($apres);
             $mouvement->setMotif($motif);
-            $mouvement->setFourniture($fourniture);
+            $mouvement->setArticle($article);
             $mouvement->setOperateur($operateur);
 
             $this->em->persist($mouvement);
@@ -96,12 +96,12 @@ class StockService
     /**
      * Ajuste le stock à une nouvelle valeur absolue.
      */
-    public function ajustementStock(Fourniture $fourniture, int $newQty, string $motif, User $operateur): void
+    public function ajustementStock(Article $article, int $newQty, string $motif, User $operateur): void
     {
-        $this->em->wrapInTransaction(function () use ($fourniture, $newQty, $motif, $operateur): void {
-            $avant = $fourniture->getStockQuantity();
+        $this->em->wrapInTransaction(function () use ($article, $newQty, $motif, $operateur): void {
+            $avant = $article->getStockQuantity();
 
-            $fourniture->setStockQuantity($newQty);
+            $article->setStockQuantity($newQty);
 
             $mouvement = new MouvementStock();
             $mouvement->setType(TypeMouvement::AJUSTEMENT);
@@ -109,13 +109,13 @@ class StockService
             $mouvement->setQuantiteAvant($avant);
             $mouvement->setQuantiteApres($newQty);
             $mouvement->setMotif($motif);
-            $mouvement->setFourniture($fourniture);
+            $mouvement->setArticle($article);
             $mouvement->setOperateur($operateur);
 
             $this->em->persist($mouvement);
 
             $this->logger->info('Ajustement stock', [
-                'fourniture' => $fourniture->getReference(),
+                'article' => $article->getReference(),
                 'avant'      => $avant,
                 'apres'      => $newQty,
                 'motif'      => $motif,
@@ -124,12 +124,12 @@ class StockService
     }
 
     /**
-     * Retourne la liste des fournitures en stock bas.
+     * Retourne la liste des articles en stock bas.
      *
-     * @return Fourniture[]
+     * @return Article[]
      */
-    public function getFournituresStockBas(): array
+    public function getArticlesStockBas(): array
     {
-        return $this->fournitureRepository->findStockBas();
+        return $this->articleRepository->findStockBas();
     }
 }

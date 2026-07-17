@@ -25,10 +25,10 @@ class LigneDemande
     #[Assert\PositiveOrZero]
     private int $quantiteServie = 0;
 
-    #[ORM\ManyToOne(targetEntity: Fourniture::class, inversedBy: 'lignesDemande')]
+    #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'lignesDemande')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: 'Veuillez sélectionner une fourniture.')]
-    private ?Fourniture $fourniture = null;
+    #[Assert\NotNull(message: 'Veuillez sélectionner un article.')]
+    private ?Article $article = null;
 
     #[ORM\ManyToOne(targetEntity: DemandeMateriel::class, inversedBy: 'lignes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -61,14 +61,14 @@ class LigneDemande
         return $this;
     }
 
-    public function getFourniture(): ?Fourniture
+    public function getArticle(): ?Article
     {
-        return $this->fourniture;
+        return $this->article;
     }
 
-    public function setFourniture(?Fourniture $fourniture): static
+    public function setArticle(?Article $article): static
     {
-        $this->fourniture = $fourniture;
+        $this->article = $article;
         return $this;
     }
 

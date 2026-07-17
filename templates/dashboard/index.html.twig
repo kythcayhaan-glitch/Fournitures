@@ -187,20 +187,20 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for f in stocksBas|slice(0, 3) %}
+                                {% for article in stocksBas|slice(0, 3) %}
                                 {% if is_granted('ROLE_MANAGER') %}
-                                <tr class="stock-bas cursor-pointer" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: f.id}) }}'">
+                                <tr class="stock-bas cursor-pointer" onclick="window.location='{{ path('app_admin_articles_edit', {id: article.id}) }}'">
                                 {% else %}
                                 <tr class="stock-bas">
                                 {% endif %}
                                     <td>
-                                        <span class="fw-semibold">{{ f.name }}</span>
-                                        <br><small class="text-muted">{{ f.reference }}</small>
+                                        <span class="fw-semibold">{{ article.name }}</span>
+                                        <br><small class="text-muted">{{ article.reference }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-danger">{{ f.stockQuantity }}</span>
+                                        <span class="badge bg-danger">{{ article.stockQuantity }}</span>
                                     </td>
-                                    <td class="text-center text-muted">{{ f.stockMinimum }}</td>
+                                    <td class="text-center text-muted">{{ article.stockMinimum }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -239,7 +239,7 @@
                                 {% for m in mouvementsRecents %}
                                 <tr>
                                     <td class="text-muted small">{{ m.createdAt|date('d/m/Y H:i') }}</td>
-                                    <td><strong>{{ m.fourniture.name }}</strong></td>
+                                    <td><strong>{{ m.article.name }}</strong></td>
                                     <td>
                                         <span class="badge {{ m.type.badgeClass() }}">{{ m.type.label() }}</span>
                                     </td>

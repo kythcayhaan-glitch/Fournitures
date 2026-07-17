@@ -1,7 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
     globals:
-        app_name: 'Gestion Fournitures Bureau'
+        app_name: 'Gestion Articles Bureau'
 
 when@test:
     twig:

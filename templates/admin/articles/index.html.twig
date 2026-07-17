@@ -1,22 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestion des fournitures{% endblock %}
-{% block page_title %}<i class="bi bi-box"></i> Fournitures{% endblock %}
+{% block title %}Gestion des articles{% endblock %}
+{% block page_title %}<i class="bi bi-box"></i> Articles{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
-        <li class="breadcrumb-item active">Fournitures</li>
+        <li class="breadcrumb-item active">Articles</li>
     </ol>
 </nav>
 {% endblock %}
 
 {% block body %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Catalogue des fournitures</h4>
-    <a href="{{ path('app_admin_fournitures_new') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nouvelle fourniture
+    <h4 class="mb-0">Catalogue des articles</h4>
+    <a href="{{ path('app_admin_articles_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nouvel article
     </a>
 </div>
 
@@ -39,7 +39,7 @@
                 <button type="submit" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-filter"></i> Filtrer
                 </button>
-                <a href="{{ path('app_admin_fournitures') }}" class="btn btn-sm btn-outline-secondary">
+                <a href="{{ path('app_admin_articles') }}" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-x"></i>
                 </a>
             </div>
@@ -58,54 +58,37 @@
                         <th>Catégorie</th>
                         <th class="text-center">Stock</th>
                         <th class="text-center">Min.</th>
-                        <th class="text-center">Statut</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for fourniture in pagination %}
-                    <tr class="cursor-pointer {{ fourniture.isStockBas ? 'table-warning' : '' }}" onclick="window.location='{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}'">
-                        <td class="text-muted small">{{ fourniture.reference }}</td>
+                    {% for article in pagination %}
+                    <tr class="cursor-pointer {{ article.isStockBas ? 'table-warning' : '' }}" onclick="window.location='{{ path('app_admin_articles_edit', {id: article.id}) }}'">
+                        <td class="text-muted small">{{ article.reference }}</td>
                         <td>
-                            <strong>{{ fourniture.name }}</strong>
-                            {% if fourniture.isStockBas %}
+                            <strong>{{ article.name }}</strong>
+                            {% if article.isStockBas %}
                                 <span class="badge bg-danger ms-1 small">Stock bas</span>
                             {% endif %}
                         </td>
-                        <td>{{ fourniture.category ? fourniture.category.name : '—' }}</td>
+                        <td>{{ article.category ? article.category.name : '—' }}</td>
                         <td class="text-center">
-                            <span class="badge {{ fourniture.isStockBas ? 'bg-danger' : 'bg-success' }}">
-                                {{ fourniture.stockQuantity }}
+                            <span class="badge {{ article.isStockBas ? 'bg-danger' : 'bg-success' }}">
+                                {{ article.stockQuantity }}
                             </span>
-                            <small class="text-muted">{{ fourniture.unit }}</small>
+                            <small class="text-muted">{{ article.unit }}</small>
                         </td>
-                        <td class="text-center text-muted">{{ fourniture.stockMinimum }}</td>
-                        <td class="text-center">
-                            {% if fourniture.isActive %}
-                                <span class="badge bg-success">Active</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Inactive</span>
-                            {% endif %}
-                        </td>
+                        <td class="text-center text-muted">{{ article.stockMinimum }}</td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm" onclick="event.stopPropagation()">
-                                <a href="{{ path('app_admin_fournitures_edit', {id: fourniture.id}) }}"
+                                <a href="{{ path('app_admin_articles_edit', {id: article.id}) }}"
                                    class="btn btn-outline-primary" title="Modifier">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ path('app_admin_inventaire_ajuster', {id: fourniture.id}) }}"
+                                <a href="{{ path('app_admin_inventaire_ajuster', {id: article.id}) }}"
                                    class="btn btn-outline-secondary" title="Ajuster stock">
                                     <i class="bi bi-clipboard-data"></i>
                                 </a>
-                                <form method="post"
-                                      action="{{ path('app_admin_fournitures_delete', {id: fourniture.id}) }}"
-                                      onsubmit="return confirm('Désactiver cette fourniture ?')"
-                                      class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_fourniture_' ~ fourniture.id) }}">
-                                    <button type="submit" class="btn btn-outline-danger" title="Désactiver">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
                             </div>
                         </td>
                     </tr>

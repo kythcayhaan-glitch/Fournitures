@@ -38,9 +38,9 @@ class MouvementStock
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\ManyToOne(targetEntity: Fourniture::class, inversedBy: 'mouvements')]
+    #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'mouvements')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Fourniture $fourniture = null;
+    private ?Article $article = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'mouvementsStock')]
     #[ORM\JoinColumn(nullable: false)]
@@ -120,14 +120,14 @@ class MouvementStock
         return $this->createdAt;
     }
 
-    public function getFourniture(): ?Fourniture
+    public function getArticle(): ?Article
     {
-        return $this->fourniture;
+        return $this->article;
     }
 
-    public function setFourniture(?Fourniture $fourniture): static
+    public function setArticle(?Article $article): static
     {
-        $this->fourniture = $fourniture;
+        $this->article = $article;
         return $this;
     }
 

@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\FournitureRepository;
+use App\Repository\ArticleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: FournitureRepository::class)]
-#[ORM\Index(columns: ['is_active'], name: 'idx_fourniture_active')]
-#[ORM\Index(columns: ['stock_quantity'], name: 'idx_fourniture_stock')]
+#[ORM\Entity(repositoryClass: ArticleRepository::class)]
+#[ORM\Index(columns: ['stock_quantity'], name: 'idx_article_stock')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['reference'], message: 'Cette référence est déjà utilisée.')]
-class Fourniture
+class Article
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -54,13 +53,10 @@ class Fourniture
     #[Assert\PositiveOrZero]
     private int $stockMinimum = 0;
 
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'fournitures')]
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Category $category = null;
-
-    #[ORM\Column]
-    private bool $isActive = true;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -69,11 +65,11 @@ class Fourniture
     private ?\DateTimeImmutable $updatedAt = null;
 
     /** @var Collection<int, LigneDemande> */
-    #[ORM\OneToMany(targetEntity: LigneDemande::class, mappedBy: 'fourniture')]
+    #[ORM\OneToMany(targetEntity: LigneDemande::class, mappedBy: 'article')]
     private Collection $lignesDemande;
 
     /** @var Collection<int, MouvementStock> */
-    #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'fourniture')]
+    #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'article')]
     private Collection $mouvements;
 
     public function __construct()
@@ -179,17 +175,6 @@ class Fourniture
     public function setCategory(?Category $category): static
     {
         $this->category = $category;
-        return $this;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): static
-    {
-        $this->isActive = $isActive;
         return $this;
     }
 

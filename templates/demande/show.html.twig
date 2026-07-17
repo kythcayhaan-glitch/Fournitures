@@ -64,8 +64,8 @@
                 {% if demande.isPending %}
                     {% set indispos = [] %}
                     {% for ligne in demande.lignes %}
-                        {% if ligne.fourniture.stockQuantity == 0 %}
-                            {% set indispos = indispos|merge([ligne.fourniture.name]) %}
+                        {% if ligne.article.stockQuantity == 0 %}
+                            {% set indispos = indispos|merge([ligne.article.name]) %}
                         {% endif %}
                     {% endfor %}
                     {% if indispos is not empty %}
@@ -94,23 +94,23 @@
                         </thead>
                         <tbody>
                             {% for ligne in demande.lignes %}
-                            {% if demande.isPending and ligne.fourniture.stockQuantity == 0 %}{% else %}
+                            {% if demande.isPending and ligne.article.stockQuantity == 0 %}{% else %}
                             <tr>
-                                <td>{{ ligne.fourniture.name }}</td>
-                                <td class="text-muted small">{{ ligne.fourniture.reference }}</td>
-                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.fourniture.unit }}</td>
+                                <td>{{ ligne.article.name }}</td>
+                                <td class="text-muted small">{{ ligne.article.reference }}</td>
+                                <td class="text-center">{{ ligne.quantiteDemandee }} {{ ligne.article.unit }}</td>
                                 {% if is_granted('ROLE_MANAGER') %}
                                 <td class="text-center">
-                                    {% set stock = ligne.fourniture.stockQuantity %}
+                                    {% set stock = ligne.article.stockQuantity %}
                                     <span class="badge {{ stock >= ligne.quantiteDemandee ? 'bg-success' : (stock > 0 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                        {{ stock }} {{ ligne.fourniture.unit }}
+                                        {{ stock }} {{ ligne.article.unit }}
                                     </span>
                                 </td>
                                 {% endif %}
                                 {% if demande.isDelivered %}
                                 <td class="text-center">
                                     <span class="{{ ligne.quantiteServie < ligne.quantiteDemandee ? 'text-warning' : 'text-success' }}">
-                                        {{ ligne.quantiteServie }} {{ ligne.fourniture.unit }}
+                                        {{ ligne.quantiteServie }} {{ ligne.article.unit }}
                                     </span>
                                 </td>
                                 {% endif %}
