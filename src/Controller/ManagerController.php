@@ -11,6 +11,7 @@ use App\Form\ProcessDemandeType;
 use App\Repository\CategoryRepository;
 use App\Repository\DemandeMaterielRepository;
 use App\Repository\ArticleRepository;
+use App\Security\Voter\ArticleVoter;
 use App\Security\Voter\DemandeVoter;
 use App\Service\StockService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -212,5 +213,51 @@ class ManagerController extends AbstractController
             'search'      => $search,
             'categoryId'  => $categoryId,
         ]);
+    }
+
+    /**
+     * Suppression groupée d'articles depuis la vue stock.
+     */
+    #[Route('/stock/bulk-delete', name: 'app_manager_articles_bulk_delete', methods: ['POST'])]
+    public function articlesBulkDelete(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_delete_articles', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_manager_stock');
+        }
+
+        $supprimes = 0;
+        $bloques = [];
+
+        foreach ($request->request->all('ids') as $id) {
+            $article = $this->articleRepository->find($id);
+            if ($article === null) {
+                continue;
+            }
+
+            $this->denyAccessUnlessGranted(ArticleVoter::DELETE, $article);
+
+            if (!$article->getLignesDemande()->isEmpty()) {
+                $bloques[] = $article->getName();
+                continue;
+            }
+
+            $this->em->remove($article);
+            $supprimes++;
+        }
+
+        if ($supprimes > 0) {
+            $this->em->flush();
+            $this->addFlash('success', sprintf('%d article(s) supprimé(s).', $supprimes));
+        }
+
+        if (!empty($bloques)) {
+            $this->addFlash('error', sprintf(
+                'Impossible de supprimer : %s (référencé(s) dans des demandes).',
+                implode(', ', $bloques)
+            ));
+        }
+
+        return $this->redirectToRoute('app_manager_stock');
     }
 }

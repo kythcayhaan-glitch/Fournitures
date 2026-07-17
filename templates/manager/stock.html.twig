@@ -22,7 +22,14 @@
 {% endif %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span></span>
+    <form method="post" action="{{ path('app_manager_articles_bulk_delete') }}" id="bulk-delete-form"
+          onsubmit="return confirm('Supprimer définitivement les ' + document.querySelectorAll('.article-checkbox:checked').length + ' articles sélectionnés ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('bulk_delete_articles') }}">
+        <div id="bulk-inputs"></div>
+        <button type="submit" class="btn btn-sm btn-outline-danger" id="btn-bulk-delete" disabled>
+            <i class="bi bi-trash"></i> Supprimer la sélection (<span id="bulk-count">0</span>)
+        </button>
+    </form>
     <div class="d-flex gap-2">
         <a href="{{ path('app_admin_historique') }}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-clock-history"></i> Historique
@@ -60,6 +67,7 @@
             <table class="table table-sm table-hover mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th style="width: 32px"><input type="checkbox" id="select-all" class="form-check-input"></th>
                         <th>Article</th>
                         <th>Catégorie</th>
                         <th class="text-center">Stock</th>
@@ -72,6 +80,9 @@
                     {% for article in pagination %}
                     {% set is_low = article.stockQuantity <= article.stockMinimum %}
                     <tr class="cursor-pointer {{ is_low ? 'stock-bas' : '' }}" onclick="window.location='{{ path('app_admin_articles_edit', {id: article.id}) }}'">
+                        <td onclick="event.stopPropagation()">
+                            <input type="checkbox" class="article-checkbox form-check-input" value="{{ article.id }}">
+                        </td>
                         <td><strong>{{ article.name }}</strong> <small class="text-muted">{{ article.reference }}</small></td>
                         <td>{{ article.category ? article.category.name : '—' }}</td>
                         <td class="text-center">
@@ -119,4 +130,40 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const checkboxes = document.querySelectorAll('.article-checkbox');
+    const selectAll = document.getElementById('select-all');
+    const btnBulkDelete = document.getElementById('btn-bulk-delete');
+    const bulkCount = document.getElementById('bulk-count');
+    const bulkInputs = document.getElementById('bulk-inputs');
+
+    function majSelection() {
+        const coches = document.querySelectorAll('.article-checkbox:checked');
+        bulkCount.textContent = coches.length;
+        btnBulkDelete.disabled = coches.length === 0;
+    }
+
+    checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', majSelection);
+    });
+
+    selectAll.addEventListener('change', function () {
+        checkboxes.forEach(function (cb) { cb.checked = selectAll.checked; });
+        majSelection();
+    });
+
+    document.getElementById('bulk-delete-form').addEventListener('submit', function () {
+        bulkInputs.innerHTML = '';
+        document.querySelectorAll('.article-checkbox:checked').forEach(function (cb) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            bulkInputs.appendChild(input);
+        });
+    });
+</script>
 {% endblock %}
