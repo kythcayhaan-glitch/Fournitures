@@ -69,7 +69,7 @@ class Article
     private Collection $lignesDemande;
 
     /** @var Collection<int, MouvementStock> */
-    #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'article')]
+    #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'article', cascade: ['remove'])]
     private Collection $mouvements;
 
     public function __construct()

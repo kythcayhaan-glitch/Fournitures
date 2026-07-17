@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,6 +18,17 @@ class AjustementStockType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('mode', ChoiceType::class, [
+                'label'    => 'Type d\'opération',
+                'choices'  => [
+                    'Ajout de stock (livraison)'      => 'ajout',
+                    'Modification du stock (correction)' => 'ajustement',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'data'     => 'ajustement',
+                'attr'     => ['class' => 'form-check'],
+            ])
             ->add('nouvelleQuantite', IntegerType::class, [
                 'label' => 'Nouvelle quantité en stock',
                 'attr'  => ['min' => 0, 'class' => 'form-control'],

@@ -121,6 +121,28 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/articles/{id}/delete', name: 'app_admin_articles_delete', methods: ['POST'])]
+    public function articleDelete(Request $request, Article $article): Response
+    {
+        $this->denyAccessUnlessGranted(ArticleVoter::DELETE, $article);
+
+        if ($this->isCsrfTokenValid('delete_article_' . $article->getId(), $request->request->get('_token'))) {
+            if (!$article->getLignesDemande()->isEmpty()) {
+                $this->addFlash('error', sprintf(
+                    'Impossible de supprimer "%s" : il est référencé dans des demandes.',
+                    $article->getName()
+                ));
+                return $this->redirectToRoute('app_admin_articles');
+            }
+
+            $this->em->remove($article);
+            $this->em->flush();
+            $this->addFlash('success', sprintf('Article "%s" supprimé.', $article->getName()));
+        }
+
+        return $this->redirectToRoute('app_admin_articles');
+    }
+
     // ─── CATÉGORIES ─────────────────────────────────────────────────────────
 
     #[Route('/categories', name: 'app_admin_categories', methods: ['GET'])]
@@ -360,20 +382,25 @@ class AdminController extends AbstractController
             /** @var \App\Entity\User $user */
             $user = $this->getUser();
             $data = $form->getData();
+            $motif = (string) ($data['motif'] ?? '');
 
-            $this->stockService->ajustementStock(
-                $article,
-                (int) $data['nouvelleQuantite'],
-                (string) $data['motif'],
-                $user
-            );
-
-            $this->addFlash('success', sprintf(
-                'Stock de "%s" ajusté à %d %s.',
-                $article->getName(),
-                $data['nouvelleQuantite'],
-                $article->getUnit()
-            ));
+            if ($data['mode'] === 'ajout') {
+                $this->stockService->ajouterStock($article, (int) $data['nouvelleQuantite'], $motif ?: 'Livraison', $user);
+                $this->addFlash('success', sprintf(
+                    '%d %s ajouté(s) au stock de "%s".',
+                    $data['nouvelleQuantite'],
+                    $article->getUnit(),
+                    $article->getName()
+                ));
+            } else {
+                $this->stockService->ajustementStock($article, (int) $data['nouvelleQuantite'], $motif, $user);
+                $this->addFlash('success', sprintf(
+                    'Stock de "%s" ajusté à %d %s.',
+                    $article->getName(),
+                    $data['nouvelleQuantite'],
+                    $article->getUnit()
+                ));
+            }
 
             return $this->redirectToRoute('app_admin_inventaire');
         }

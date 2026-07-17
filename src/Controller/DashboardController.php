@@ -29,7 +29,7 @@ class DashboardController extends AbstractController
 
         $mesDemandesEnCours = $this->demandeRepository->findByStatutAndUser('pending', $user);
         $mesDemandes = $this->demandeRepository->findByUserWithFilters($user)->setMaxResults(10)->getQuery()->getResult();
-        $statsParStatut = $this->demandeRepository->countByStatutForUser($user);
+        $statsParStatut = $this->demandeRepository->countByStatut();
         $stocksBas = $this->stockService->getArticlesStockBas();
         $mouvementsRecents = $this->mouvementRepository->findRecent(10);
         $demandesEnAttente = $this->demandeRepository->findPending();

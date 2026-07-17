@@ -17,10 +17,11 @@ class ArticleVoter extends Voter
     public const VIEW   = 'ARTICLE_VIEW';
     public const CREATE = 'ARTICLE_CREATE';
     public const EDIT   = 'ARTICLE_EDIT';
+    public const DELETE = 'ARTICLE_DELETE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (!in_array($attribute, [self::VIEW, self::CREATE, self::EDIT], true)) {
+        if (!in_array($attribute, [self::VIEW, self::CREATE, self::EDIT, self::DELETE], true)) {
             return false;
         }
 
@@ -46,7 +47,7 @@ class ArticleVoter extends Voter
 
         return match ($attribute) {
             self::VIEW   => true, // tout utilisateur authentifié et actif
-            self::CREATE, self::EDIT => $this->isAdminOrManager($user),
+            self::CREATE, self::EDIT, self::DELETE => $this->isAdminOrManager($user),
             default      => false,
         };
     }

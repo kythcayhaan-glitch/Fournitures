@@ -98,6 +98,15 @@
                                    class="btn btn-outline-secondary" title="Ajuster stock">
                                     <i class="bi bi-clipboard-data"></i>
                                 </a>
+                                <form method="post"
+                                      action="{{ path('app_admin_articles_delete', {id: article.id}) }}"
+                                      onsubmit="return confirm('Supprimer définitivement {{ article.name|e('js') }} ?')"
+                                      class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_article_' ~ article.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

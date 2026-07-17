@@ -41,12 +41,26 @@
                 </div>
 
                 {{ form_start(form) }}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Type d'opération</label>
+                    <div class="d-flex gap-3">
+                        {% for child in form.mode %}
+                        <div class="form-check">
+                            {{ form_widget(child, {attr: {class: 'form-check-input', 'data-mode-radio': true}}) }}
+                            {{ form_label(child, null, {label_attr: {class: 'form-check-label'}}) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 {{ form_row(form.nouvelleQuantite) }}
+                <div id="aide-quantite" class="form-text text-muted mt-n2 mb-3"></div>
                 {{ form_row(form.motif) }}
 
                 <div class="d-flex gap-2 mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Appliquer l'ajustement
+                        <i class="bi bi-check-lg"></i> Appliquer
                     </button>
                     <a href="javascript:history.back()" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Retour
@@ -57,4 +71,64 @@
         </div>
     </div>
 </div>
+
+{% if not form.vars.submitted %}
+<div class="modal fade" id="modalTypeAjustement" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-clipboard-data"></i> Que voulez-vous faire ?</h5>
+            </div>
+            <div class="modal-body d-flex flex-column gap-2">
+                <button type="button" class="btn btn-outline-primary text-start p-3" data-choix-mode="ajout" data-bs-dismiss="modal">
+                    <i class="bi bi-box-arrow-in-down fs-4 me-2"></i>
+                    <strong>Ajout de stock</strong>
+                    <div class="small text-muted">Suite à une livraison reçue — la quantité saisie s'ajoute au stock actuel.</div>
+                </button>
+                <button type="button" class="btn btn-outline-secondary text-start p-3" data-choix-mode="ajustement" data-bs-dismiss="modal">
+                    <i class="bi bi-pencil-square fs-4 me-2"></i>
+                    <strong>Modification du stock</strong>
+                    <div class="small text-muted">Correction suite à un inventaire ou une erreur — la quantité saisie remplace le stock actuel.</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const aide = document.getElementById('aide-quantite');
+    const messages = {
+        ajout: 'Quantité reçue à ajouter au stock actuel.',
+        ajustement: 'Nouvelle quantité totale en stock (remplace la valeur actuelle).',
+    };
+
+    function majAide() {
+        const coche = document.querySelector('[data-mode-radio]:checked');
+        aide.textContent = coche ? messages[coche.value] : '';
+    }
+
+    document.querySelectorAll('[data-mode-radio]').forEach(function (radio) {
+        radio.addEventListener('change', majAide);
+    });
+
+    document.querySelectorAll('[data-choix-mode]').forEach(function (bouton) {
+        bouton.addEventListener('click', function () {
+            const radio = document.querySelector('[data-mode-radio][value="' + bouton.dataset.choixMode + '"]');
+            if (radio) {
+                radio.checked = true;
+                majAide();
+            }
+        });
+    });
+
+    majAide();
+
+    const modalEl = document.getElementById('modalTypeAjustement');
+    if (modalEl) {
+        new bootstrap.Modal(modalEl).show();
+    }
+</script>
 {% endblock %}

@@ -153,20 +153,25 @@ class ManagerController extends AbstractController
             /** @var \App\Entity\User $user */
             $user = $this->getUser();
             $data = $form->getData();
+            $motif = (string) ($data['motif'] ?? '');
 
-            $this->stockService->ajustementStock(
-                $article,
-                (int) $data['nouvelleQuantite'],
-                (string) ($data['motif'] ?? ''),
-                $user
-            );
-
-            $this->addFlash('success', sprintf(
-                'Stock de "%s" ajusté à %d %s.',
-                $article->getName(),
-                $data['nouvelleQuantite'],
-                $article->getUnit()
-            ));
+            if ($data['mode'] === 'ajout') {
+                $this->stockService->ajouterStock($article, (int) $data['nouvelleQuantite'], $motif ?: 'Livraison', $user);
+                $this->addFlash('success', sprintf(
+                    '%d %s ajouté(s) au stock de "%s".',
+                    $data['nouvelleQuantite'],
+                    $article->getUnit(),
+                    $article->getName()
+                ));
+            } else {
+                $this->stockService->ajustementStock($article, (int) $data['nouvelleQuantite'], $motif, $user);
+                $this->addFlash('success', sprintf(
+                    'Stock de "%s" ajusté à %d %s.',
+                    $article->getName(),
+                    $data['nouvelleQuantite'],
+                    $article->getUnit()
+                ));
+            }
 
             return $this->redirectToRoute('app_manager_stock');
         }

@@ -122,28 +122,6 @@ class DemandeMaterielRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne le nombre de demandes par statut pour un utilisateur.
-     *
-     * @return array<string, int>
-     */
-    public function countByStatutForUser(User $user): array
-    {
-        $results = $this->createQueryBuilder('d')
-            ->select('d.statut, COUNT(d.id) as cnt')
-            ->andWhere('d.requester = :user')
-            ->setParameter('user', $user)
-            ->groupBy('d.statut')
-            ->getQuery()
-            ->getResult();
-
-        $counts = [];
-        foreach ($results as $row) {
-            $counts[$row['statut']] = (int) $row['cnt'];
-        }
-        return $counts;
-    }
-
-    /**
      * Compte le dernier index de référence pour aujourd'hui.
      */
     public function countTodayDemandes(): int
