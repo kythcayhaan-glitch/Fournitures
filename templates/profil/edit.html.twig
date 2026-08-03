@@ -13,6 +13,12 @@
 {% endblock %}
 
 {% block body %}
+{% if app.user.mustChangePassword %}
+<div class="alert alert-warning" style="max-width: 780px;">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    Vous devez changer votre mot de passe avant de continuer.
+</div>
+{% endif %}
 <div class="row g-4" style="max-width: 780px;">
 
     {# ── Informations personnelles ── #}

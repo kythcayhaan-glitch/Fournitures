@@ -50,13 +50,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * Retourne tous les utilisateurs avec pagination.
      */
-    public function findAllOrderedByName(): array
+    public function findAllOrderedByName(?string $search = null): array
     {
-        return $this->createQueryBuilder('u')
-            ->orderBy('u.lastName', 'ASC')
-            ->addOrderBy('u.firstName', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('u')
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC');
+
+        if ($search) {
+            $qb->andWhere('u.firstName LIKE :search OR u.lastName LIKE :search OR u.service LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     /**

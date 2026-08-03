@@ -80,6 +80,7 @@ class ProfilController extends AbstractController
             } else {
                 $newPassword = $form->get('newPassword')->getData();
                 $user->setPassword($this->hasher->hashPassword($user, $newPassword));
+                $user->setMustChangePassword(false);
                 $this->em->flush();
                 $this->addFlash('success', 'Mot de passe modifié avec succès.');
                 return $this->redirectToRoute('app_profil');

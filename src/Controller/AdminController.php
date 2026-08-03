@@ -212,12 +212,14 @@ class AdminController extends AbstractController
     // ─── UTILISATEURS ───────────────────────────────────────────────────────
 
     #[Route('/users', name: 'app_admin_users', methods: ['GET'])]
-    public function users(): Response
+    public function users(Request $request): Response
     {
-        $users = $this->userRepository->findAllOrderedByName();
+        $search = $request->query->get('search');
+        $users  = $this->userRepository->findAllOrderedByName($search ?: null);
 
         return $this->render('admin/users/index.html.twig', [
-            'users' => $users,
+            'users'  => $users,
+            'search' => $search,
         ]);
     }
 

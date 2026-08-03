@@ -50,6 +50,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isActive = true;
 
+    #[ORM\Column]
+    private bool $mustChangePassword = false;
+
     /** @var Collection<int, DemandeMateriel> */
     #[ORM\OneToMany(targetEntity: DemandeMateriel::class, mappedBy: 'requester')]
     private Collection $demandes;
@@ -162,6 +165,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function isMustChangePassword(): bool
+    {
+        return $this->mustChangePassword;
+    }
+
+    public function setMustChangePassword(bool $mustChangePassword): static
+    {
+        $this->mustChangePassword = $mustChangePassword;
         return $this;
     }
 
