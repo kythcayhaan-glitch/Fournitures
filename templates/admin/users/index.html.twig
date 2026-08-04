@@ -39,7 +39,7 @@
                     <th>Nom</th>
                     <th>Rôles</th>
                     <th class="text-center">Statut</th>
-                    <th>Inscrit le</th>
+                    <th class="text-center">Mot de passe</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -67,7 +67,13 @@
                             <span class="badge bg-secondary"><i class="bi bi-x"></i> Inactif</span>
                         {% endif %}
                     </td>
-                    <td class="text-muted small">{{ user.createdAt|date('d/m/Y') }}</td>
+                    <td class="text-center">
+                        {% if user.mustChangePassword %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> À changer</span>
+                        {% else %}
+                            <span class="badge bg-success"><i class="bi bi-check"></i> Changé</span>
+                        {% endif %}
+                    </td>
                     <td class="text-center">
                         {% if user != app.user and not user.rootAdmin %}
                         <div class="d-flex gap-2 justify-content-center align-items-center">
