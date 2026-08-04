@@ -252,6 +252,11 @@ class AdminController extends AbstractController
     #[Route('/users/{id}/edit', name: 'app_admin_users_edit', methods: ['GET', 'POST'])]
     public function userEdit(Request $request, User $user): Response
     {
+        if ($user->isRootAdmin() && $user !== $this->getUser()) {
+            $this->addFlash('error', 'Le compte admin ne peut être modifié que par lui-même.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
         $currentRole = 'ROLE_USER';
         if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             $currentRole = 'ROLE_ADMIN';
@@ -294,6 +299,11 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('app_admin_users');
         }
 
+        if ($user->isRootAdmin()) {
+            $this->addFlash('error', 'Le compte admin ne peut être supprimé.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
         if ($this->isCsrfTokenValid('delete_user_' . $user->getId(), $request->request->get('_token'))) {
             if (!$user->getDemandes()->isEmpty() || !$user->getDemandesTraitees()->isEmpty() || !$user->getMouvementsStock()->isEmpty()) {
                 $this->addFlash('error', sprintf(
@@ -316,6 +326,11 @@ class AdminController extends AbstractController
     {
         if ($user === $this->getUser()) {
             $this->addFlash('error', 'Vous ne pouvez pas modifier votre propre rôle.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        if ($user->isRootAdmin()) {
+            $this->addFlash('error', 'Le compte admin ne peut être modifié que par lui-même.');
             return $this->redirectToRoute('app_admin_users');
         }
 
@@ -348,6 +363,11 @@ class AdminController extends AbstractController
     #[Route('/users/{id}/toggle', name: 'app_admin_users_toggle', methods: ['POST'])]
     public function userToggle(Request $request, User $user): Response
     {
+        if ($user->isRootAdmin() && $user !== $this->getUser()) {
+            $this->addFlash('error', 'Le compte admin ne peut être modifié que par lui-même.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
         if ($this->isCsrfTokenValid('toggle_user_' . $user->getId(), $request->request->get('_token'))) {
             $user->setIsActive(!$user->isActive());
             $this->em->flush();

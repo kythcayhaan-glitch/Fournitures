@@ -69,7 +69,7 @@
                     </td>
                     <td class="text-muted small">{{ user.createdAt|date('d/m/Y') }}</td>
                     <td class="text-center">
-                        {% if user != app.user %}
+                        {% if user != app.user and not user.rootAdmin %}
                         <div class="d-flex gap-2 justify-content-center align-items-center">
                             <a href="{{ path('app_admin_users_edit', {id: user.id}) }}"
                                class="btn btn-sm btn-outline-secondary" title="Modifier">

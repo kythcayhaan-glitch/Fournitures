@@ -189,6 +189,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return in_array('ROLE_MANAGER', $this->getRoles(), true) || $this->isAdmin();
     }
 
+    public function isRootAdmin(): bool
+    {
+        return strtolower($this->firstName) === 'admin' && strtolower($this->lastName) === 'admin';
+    }
+
     /** @return Collection<int, DemandeMateriel> */
     public function getDemandes(): Collection
     {
