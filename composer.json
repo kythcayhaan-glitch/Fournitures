@@ -24,6 +24,7 @@
         "symfony/messenger": "7.1.*",
         "symfony/monolog-bundle": "^3.10",
         "symfony/password-hasher": "7.1.*",
+        "symfony/rate-limiter": "7.1.*",
         "symfony/runtime": "7.1.*",
         "symfony/security-bundle": "7.1.*",
         "symfony/translation": "7.1.*",
