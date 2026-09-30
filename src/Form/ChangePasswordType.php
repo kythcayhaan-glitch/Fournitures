@@ -15,13 +15,16 @@ class ChangePasswordType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
-            ->add('currentPassword', PasswordType::class, [
+        if ($options['require_current']) {
+            $builder->add('currentPassword', PasswordType::class, [
                 'label'  => 'Mot de passe actuel',
                 'mapped' => false,
                 'attr'   => ['class' => 'form-control', 'autocomplete' => 'current-password'],
                 'constraints' => [new Assert\NotBlank()],
-            ])
+            ]);
+        }
+
+        $builder
             ->add('newPassword', RepeatedType::class, [
                 'type'            => PasswordType::class,
                 'mapped'          => false,
@@ -47,6 +50,8 @@ class ChangePasswordType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'require_current' => true,
+        ]);
     }
 }

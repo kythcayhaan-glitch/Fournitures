@@ -3,32 +3,7 @@
 {% block title %}Connexion — Gestion Articles{% endblock %}
 
 {% block stylesheets %}
-<style>
-body {
-    background: #fff !important;
-    min-height: 100vh;
-}
-.login-page { min-height: 100vh; display: flex; align-items: center; padding: 3rem 0; }
-.login-logo { height: 72px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.15)); }
-.login-title { color: #1a1a2e; letter-spacing: .5px; }
-.login-card {
-    border: 1px solid #eee;
-    border-radius: 1rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,.08);
-}
-.login-card .card-body { padding: 2.25rem; }
-.login-card .form-control,
-.login-card .input-group-text { border-color: #dee2e6; }
-.login-card .form-control:focus { box-shadow: 0 0 0 .2rem rgba(13,110,253,.15); }
-.login-card .btn-primary {
-    background: linear-gradient(135deg, #1a1a2e 0%, #2b4a8f 100%);
-    border: none;
-    border-radius: .5rem;
-    padding: .6rem 1rem;
-    font-weight: 600;
-}
-.login-card .btn-primary:hover { filter: brightness(1.15); }
-</style>
+<link href="{{ asset('css/login.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
@@ -45,6 +20,8 @@ body {
 
         <div class="card login-card">
             <div class="card-body">
+                {% include 'security/_flashes.html.twig' %}
+
                 {% if error %}
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle me-1"></i>
@@ -80,6 +57,10 @@ body {
                         <i class="bi bi-box-arrow-in-right me-1"></i> Se connecter
                     </button>
                 </form>
+
+                <div class="text-center mt-3">
+                    <a href="{{ path('app_forgot_password') }}" class="small">Mot de passe oublié ?</a>
+                </div>
             </div>
         </div>
     </div>
