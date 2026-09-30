@@ -32,9 +32,10 @@ class UserCreateType extends AbstractType
                 'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
             ])
             ->add('email', EmailType::class, [
-                'label'    => 'Email',
-                'required' => false,
-                'attr'     => ['class' => 'form-control', 'placeholder' => 'Utilisé pour « Mot de passe oublié »'],
+                'label'       => 'Email',
+                'required'    => $options['require_email'],
+                'attr'        => ['class' => 'form-control', 'placeholder' => 'Utilisé pour « Mot de passe oublié »'],
+                'constraints' => $options['require_email'] ? [new Assert\NotBlank()] : [],
             ])
             ->add('service', TextType::class, [
                 'label'    => 'Service',
@@ -58,7 +59,10 @@ class UserCreateType extends AbstractType
                     ? [new Assert\NotBlank(), new Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
                     : [new Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')],
             ])
-            ->add('role', ChoiceType::class, [
+        ;
+
+        if ($options['show_role']) {
+            $builder->add('role', ChoiceType::class, [
                 'label'   => 'Rôle',
                 'mapped'  => false,
                 'choices' => [
@@ -68,8 +72,8 @@ class UserCreateType extends AbstractType
                 ],
                 'attr'    => ['class' => 'form-select'],
                 'data'    => $options['initial_role'],
-            ])
-        ;
+            ]);
+        }
 
         if ($options['show_active']) {
             $builder->add('isActive', CheckboxType::class, [
@@ -86,6 +90,8 @@ class UserCreateType extends AbstractType
             'data_class'       => User::class,
             'require_password' => true,
             'show_active'      => false,
+            'show_role'        => true,
+            'require_email'    => false,
             'initial_role'     => 'ROLE_USER',
         ]);
     }

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\ChangePasswordType;
+use App\Form\UserCreateType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -35,6 +36,33 @@ class SecurityController extends AbstractController
             'last_username' => $authenticationUtils->getLastUsername(),
             'error'         => $authenticationUtils->getLastAuthenticationError(),
             'changelog'     => $changelog['changelog'] ?? [],
+        ]);
+    }
+
+    #[Route('/login/inscription', name: 'app_register', methods: ['GET', 'POST'])]
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
+    {
+        $user = new User();
+        $user->setIsActive(false);
+
+        $form = $this->createForm(UserCreateType::class, $user, [
+            'show_role'     => false,
+            'require_email' => true,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPassword($passwordHasher->hashPassword($user, $form->get('plainPassword')->getData()));
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Compte créé. Il sera utilisable dès qu\'un administrateur l\'aura validé.');
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('security/register.html.twig', [
+            'form' => $form,
         ]);
     }
 
