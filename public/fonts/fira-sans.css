@@ -1,0 +1,41 @@
+/* Fira Sans (même police que php.net), hébergée localement — licence OFL dans ce dossier */
+@font-face {
+    font-family: "Fira Sans";
+    font-weight: 400;
+    font-display: swap;
+    src: url("fira-sans-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Fira Sans";
+    font-weight: 500;
+    font-display: swap;
+    src: url("fira-sans-500.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Fira Sans";
+    font-weight: 600;
+    font-display: swap;
+    src: url("fira-sans-600.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Fira Sans";
+    font-weight: 700;
+    font-display: swap;
+    src: url("fira-sans-700.woff2") format("woff2");
+}
+
+:root {
+    --bs-font-sans-serif: "Fira Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--bs-font-sans-serif);
+}
